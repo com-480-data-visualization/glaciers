@@ -3,8 +3,9 @@
 | Student's name | SCIPER |
 | -------------- | ------ |
 | Stefan Peters | 329305 |
-| | |
-| | |
+| Lilian Noé | 325520 |
+| Timaël Andrié | 362529 |
+| Corentin Suply | 330578 |
 
 [Milestone 1](#milestone-1) • [Milestone 2](#milestone-2) • [Milestone 3](#milestone-3)
 
