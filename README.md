@@ -2,7 +2,7 @@
 
 | Student's name | SCIPER |
 | -------------- | ------ |
-| | |
+| Stefan Peters | 329305 |
 | | |
 | | |
 
