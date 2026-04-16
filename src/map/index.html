@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Swiss Glaciers — Evolution Through Time</title>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="logo-area">
+      <div class="logo-text">
+        <span>Evolution Through Time</span>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="header-stat">
+        <div class="header-stat-value" id="totalGlaciers">20</div>
+        <div class="header-stat-label">Glaciers</div>
+      </div>
+      <div class="header-stat">
+        <div class="header-stat-value" id="totalArea">--</div>
+        <div class="header-stat-label">Total Area (km²)</div>
+      </div>
+      <div class="header-stat">
+        <div class="header-stat-value" id="totalChange">--</div>
+        <div class="header-stat-label">Change</div>
+      </div>
+    </div>
+  </header>
+
+  <div id="map"></div>
+
+  <div class="map-legend" id="mapLegend">
+    <div class="map-legend-title">Glacier Size</div>
+    <div class="map-legend-row">
+      <div class="legend-dot" style="background:var(--glacier-deep)"></div>
+      <span>Large (&gt; 30 km²)</span>
+    </div>
+    <div class="map-legend-row">
+      <div class="legend-dot" style="background:var(--glacier-mid)"></div>
+      <span>Medium (10–30 km²)</span>
+    </div>
+    <div class="map-legend-row">
+      <div class="legend-dot" style="background:var(--glacier-light)"></div>
+      <span>Small (&lt; 10 km²)</span>
+    </div>
+    <div class="map-legend-row" style="margin-top: 8px;">
+      <div class="legend-dot" style="background:var(--danger)"></div>
+      <span>Critical retreat (&gt; 50% lost)</span>
+    </div>
+  </div>
+
+  <div class="slider-panel">
+  <div class="slider-header">
+    <div class="slider-label">Timeline</div>
+    <div class="slider-year" id="yearDisplay">1973</div>
+  </div>
+  <div class="slider-track-container">
+    <input type="range" id="yearSlider" min="1973" max="2025" value="1973" step="1" />
+    <div class="slider-ticks" id="sliderTicks"></div>
+  </div>
+</div>
+
+
+  <div class="vector-legend" id="vectorLegend">
+    <div class="vector-legend-title">Flow &amp; Melt Vectors</div>
+    <div class="vector-legend-row">
+      <div class="vector-legend-swatch" style="background:linear-gradient(90deg,#2e86c1,#85c1e9)"></div>
+      <span>Ice flow → center</span>
+    </div>
+    <div class="vector-legend-row">
+      <div class="vector-legend-swatch" style="background:linear-gradient(90deg,#c0392b,#e74c3c)"></div>
+      <span>Meltwater → tongue</span>
+    </div>
+    <div class="vector-legend-row">
+      <div class="vector-legend-swatch" style="background:linear-gradient(90deg,#c0713a,#e8a87c)"></div>
+      <span>Lateral runoff</span>
+    </div>
+    <div class="vector-legend-row" style="margin-top:6px;opacity:0.7">
+      <span>Arrows converge toward glacier</span>
+    </div>
+  </div>
+
+  <div class="glacier-popup" id="glacierPopup">
+    <button class="popup-close" id="popupClose">&times;</button>
+    <div class="popup-hero-name" id="popupName">Glacier Name</div>
+    <div class="popup-placeholder">// Glacier data to precise</div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>

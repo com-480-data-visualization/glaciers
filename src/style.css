@@ -1,0 +1,215 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* --- 1. The Color Palette (CSS Variables) --- */
+:root {
+    --earth-900: #1a1510;
+    --earth-800: #2d261d;
+    --earth-700: #3e3527;
+    --earth-600: #5c4f3a;
+    --earth-500: #7a6b52;
+    --earth-400: #a89880;
+    --earth-300: #c4b8a4;
+    --earth-200: #e0d8cc;
+    --earth-100: #f0ece4;
+    --earth-50:  #f8f5f0;
+    --glacier-deep: #1a5276;
+    --glacier-mid: #2e86c1;
+    --glacier-light: #85c1e9;
+    --glacier-pale: #d4e6f1;
+    --glacier-ice: #e8f4fd;
+    --accent-warm: #c0713a;
+    --accent-green: #4a7c59;
+    --danger: #c0392b;
+    --shadow-sm: 0 1px 3px rgba(26,21,16,0.12);
+    --shadow-md: 0 4px 12px rgba(26,21,16,0.15);
+    --shadow-lg: 0 8px 32px rgba(26,21,16,0.2);
+    --shadow-xl: 0 16px 48px rgba(26,21,16,0.25);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --bg-card: #1e1e1e;         /* Slightly lighter for the iframe cards */
+    --bg-topbar: #181818;       /* Almost black for the header */
+    --text-main: #1f1d1d;       /* Soft white for readability */
+    --text-muted: #a0a0a0;      /* Gray for secondary text */
+    --accent-color: #4ea8de;    /* A sleek "data" blue for links/highlights */
+    --border-color: var(--earth-700);
+  }
+
+/* --- 2. Basic Reset --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: linear-gradient(135deg, var(--earth-800) 0%, var(--earth-700) 100%);
+    padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: var(--shadow-lg);
+  }
+  .logo-area {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--glacier-light), var(--glacier-deep));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .logo-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px; color: var(--earth-50);
+    letter-spacing: 0.5px;
+  }
+  .logo-text span {
+    font-size: 11px; color: var(--earth-400);
+    letter-spacing: 1.5px; text-transform: uppercase;
+    font-weight: 500;
+  }
+  .header-stats {
+    display: flex; gap: 24px; align-items: center;
+  }
+  .header-stat {
+    text-align: center;
+  }
+  .header-stat-value {
+    font-size: 18px; font-weight: 700; color: var(--glacier-light);
+    font-variant-numeric: tabular-nums;
+  }
+  .header-stat-label {
+    font-size: 10px; color: var(--earth-400);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+
+.page-hero {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.page-hero h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3rem;
+    color: var(--text-main);
+    margin-bottom: 10px;
+}
+
+body {
+    font-family: 'Inter', sans-serif; /* A cleaner, modern font */
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    padding: 0; /* Removed body padding so the topbar spans 100% */
+}
+
+.site-title {
+    font-size: 1.5rem;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.topbar-right {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--accent-color);
+}
+
+/* --- 4. The Centered Title --- */
+.page-title-section {
+    text-align: center;
+    margin-bottom: 50px;
+    padding: 0 20px;
+}
+
+.page-title-section h2 {
+    font-size: 2.5rem;
+    color: var(--text-main);
+    margin-bottom: 10px;
+}
+
+.page-title-section p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+/* --- 5. The Scrolling List --- */
+.scrolling-list {
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+    max-width: 1000px;
+    /* This is the key idea: 120px top margin pushes it below the fixed header */
+    margin: 120px auto 100px auto; 
+}
+
+/* --- 6. The iFrame Containers --- */
+.iframe-card {
+    background-color: var(--bg-card);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5); /* Stronger shadow for depth in dark mode */
+}
+
+.iframe-card h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.iframe-card iframe {
+    width: 100%;
+    height: 650px; 
+    border: none; /* Removed the default border so the visualization blends seamlessly */
+    border-radius: 8px;
+    background-color: var(--bg-main); /* Fallback while loading */
+}
+
+/* --- 7. Clickable Box Row --- */
+.box-row {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.clickable-box {
+    flex: 1; /* Makes all three boxes equally wide */
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px 20px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-main);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.clickable-box h4 {
+    margin-bottom: 10px;
+    color: var(--accent-color);
+    font-size: 1.1rem;
+}
+
+.clickable-box p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* The hover effect makes them feel truly interactive */
+.clickable-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    border-color: var(--accent-color);
+}

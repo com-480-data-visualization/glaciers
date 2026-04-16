@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velocity Data Brainstorming — Swiss Glaciers</title>
+  
+  <link rel="stylesheet" href="../style.css">
+  
+  <style>
+    /* Specific styles for the Velocity page */
+    .page-hero {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .page-hero h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 3rem;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+    .disclaimer-box {
+      background: rgba(192, 113, 58, 0.1); /* Uses your warm accent color */
+      border-left: 4px solid var(--accent-warm);
+      padding: 20px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 40px;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .back-btn:hover {
+      color: var(--accent-color);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-area">
+      <div class="logo-icon"></div> 
+      <div class="logo-text">
+        <h1>COM-480: Swiss Glaciers</h1>
+      </div>
+    </div>
+  </header>
+
+  <main class="scrolling-list">
+    
+    <div style="max-width: 1000px; margin: 0 auto; width: 100%;">
+      
+      <a href="../index.html" class="back-btn">← Back to Overview</a>
+      
+      <div class="page-hero">
+        <h2>Velocity Data Sandbox</h2>
+      </div>
+
+      <div class="disclaimer-box">
+        <strong>Developer Note:</strong> This visualization includes the real flow velocity data. It will not be implemented exactly like this in the final project, but it is helpful to brainstorm, visualize the data and test the mappings.
+      </div>
+
+      <article class="iframe-card">
+        <h3>Raw Velocity Prototyping</h3>
+        <iframe src="velocity_map.html" sandbox="allow-scripts allow-same-origin"></iframe>
+      </article>
+
+    </div>
+  </main>
+
+</body>
+</html>

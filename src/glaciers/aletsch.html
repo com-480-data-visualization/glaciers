@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grosser Aletschgletscher — Swiss Glaciers</title>
+  
+  <link rel="stylesheet" href="../style.css">
+  
+  <style>
+    /* Specific styles for the deep-dive page to match the old popup feel */
+    .glacier-hero {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .glacier-hero h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 3rem;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+    .glacier-region {
+      color: var(--accent-color);
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .glacier-stats-grid {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-box {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--glacier-light);
+      margin-bottom: 5px;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .glacier-description {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: var(--text-main);
+      margin-bottom: 30px;
+      padding: 20px;
+      background: var(--bg-card);
+      border-left: 4px solid var(--accent-color);
+      border-radius: 0 8px 8px 0;
+    }
+    .glacier-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+    .tag {
+      background: rgba(78, 168, 222, 0.1);
+      color: var(--accent-color);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid rgba(78, 168, 222, 0.3);
+    }
+    /* A simple CSS table for the historical data */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .data-table th, .data-table td {
+      padding: 12px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .data-table th {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+    .data-table tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .back-btn:hover {
+      color: var(--accent-color);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-area">
+      <div class="logo-icon"></div> 
+      <div class="logo-text">
+        <h1>COM-480: Swiss Glaciers</h1>
+      </div>
+    </div>
+  </header>
+
+  <main class="scrolling-list">
+    
+    <div style="max-width: 800px; margin: 0 auto; width: 100%;">
+      
+      <a href="../index.html" class="back-btn">← Back to Overview</a>
+      
+      <div class="glacier-hero">
+        <h2>Grosser Aletschgletscher</h2>
+        <div class="glacier-region">Bernese Alps, Valais</div>
+      </div>
+
+      <div class="glacier-stats-grid">
+        <div class="stat-box">
+          <div class="stat-value">1560–4160 m</div>
+          <div class="stat-label">Elevation</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">Valley glacier</div>
+          <div class="stat-label">Type</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">56.0 km²</div>
+          <div class="stat-label">Est. Area (2025)</div>
+        </div>
+      </div>
+
+      <div class="glacier-description">
+        The largest glacier in the Alps and a UNESCO World Heritage site. It stretches over 22 km from the Jungfrau region down towards the Rhone Valley. It has been retreating significantly since the Little Ice Age.
+      </div>
+
+      <div class="glacier-tags">
+        <span class="tag">UNESCO Heritage</span>
+        <span class="tag">Largest in Alps</span>
+        <span class="tag">Valley glacier</span>
+        <span class="tag">Valais</span>
+      </div>
+
+      <article class="iframe-card">
+        <h3>Area Evolution (1973 - 2025)</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
+          Historical surface area measurements and calculated percentage loss relative to the 1973 baseline.
+        </p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Area (km²)</th>
+              <th>Total Loss</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1973</td><td>82.5</td><td>0.0%</td></tr>
+            <tr><td>1980</td><td>80.2</td><td style="color: var(--danger)">-2.8%</td></tr>
+            <tr><td>1985</td><td>78.5</td><td style="color: var(--danger)">-4.8%</td></tr>
+            <tr><td>1990</td><td>76.8</td><td style="color: var(--danger)">-6.9%</td></tr>
+            <tr><td>1995</td><td>75.0</td><td style="color: var(--danger)">-9.1%</td></tr>
+            <tr><td>2000</td><td>73.0</td><td style="color: var(--danger)">-11.5%</td></tr>
+            <tr><td>2005</td><td>70.5</td><td style="color: var(--danger)">-14.5%</td></tr>
+            <tr><td>2010</td><td>67.8</td><td style="color: var(--danger)">-17.8%</td></tr>
+            <tr><td>2015</td><td>64.5</td><td style="color: var(--danger)">-21.8%</td></tr>
+            <tr><td>2020</td><td>60.0</td><td style="color: var(--danger)">-27.3%</td></tr>
+            <tr><td>2025</td><td>56.0</td><td style="color: var(--danger)">-32.1%</td></tr>
+          </tbody>
+        </table>
+      </article>
+
+    </div>
+  </main>
+
+</body>
+</html>
