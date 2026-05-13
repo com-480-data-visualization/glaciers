@@ -154,27 +154,26 @@ body {
 
 /* --- 6. The iFrame Containers --- */
 .iframe-card {
-    background-color: var(--bg-card);
+    background: linear-gradient(135deg, var(--earth-800) 0%, var(--earth-700) 100%);
     padding: 20px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
     box-shadow: 0 15px 35px rgba(0,0,0,0.5); /* Stronger shadow for depth in dark mode */
 }
-
 .iframe-card h3 {
     text-align: center;
     margin-bottom: 15px;
     color: var(--accent-color);
     font-weight: 600;
 }
-
 .iframe-card iframe {
     width: 100%;
-    height: 650px; 
-    border: none; /* Removed the default border so the visualization blends seamlessly */
+    height: 550px; 
+    border: none;
     border-radius: 8px;
     background-color: var(--bg-main); /* Fallback while loading */
 }
+
 
 /* --- 7. Clickable Box Row --- */
 .box-row {
@@ -185,7 +184,7 @@ body {
 
 .clickable-box {
     flex: 1; /* Makes all three boxes equally wide */
-    background-color: var(--bg-card);
+    background: linear-gradient(135deg, var(--earth-800) 0%, var(--earth-700) 100%);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 30px 20px;

@@ -1,227 +1,3 @@
-// ── GLACIER DATA ──
-const glaciers = [
-  {
-    id: "aletsch",
-    name: "Grosser Aletschgletscher",
-    region: "Bernese Alps, Valais",
-    lat: 46.4428, lng: 8.0769,
-    elevation: "1560–4160 m",
-    type: "Valley glacier",
-    description: "The largest glacier in the Alps and a UNESCO World Heritage site. It stretches over 22 km from the Jungfrau region down towards the Rhone Valley. It has been retreating significantly since the Little Ice Age.",
-    tags: ["UNESCO Heritage", "Largest in Alps", "Valley glacier", "Valais"],
-    areaByYear: { 1973: 82.5, 1980: 80.2, 1985: 78.5, 1990: 76.8, 1995: 75.0, 2000: 73.0, 2005: 70.5, 2010: 67.8, 2015: 64.5, 2020: 60.0, 2025: 56.0 }
-  },
-  {
-    id: "gorner",
-    name: "Gornergletscher",
-    region: "Pennine Alps, Valais",
-    lat: 45.9685, lng: 7.8010,
-    elevation: "2200–4600 m",
-    type: "Valley glacier",
-    description: "The second-largest glacier system in the Alps, located near Zermatt at the foot of Monte Rosa. It forms a complex system with several tributary glaciers converging in a spectacular ice landscape.",
-    tags: ["Monte Rosa", "Second largest", "Valley glacier", "Zermatt"],
-    areaByYear: { 1973: 57.5, 1980: 56.0, 1985: 54.5, 1990: 53.0, 1995: 51.5, 2000: 49.5, 2005: 47.0, 2010: 44.5, 2015: 42.0, 2020: 39.0, 2025: 36.5 }
-  },
-  {
-    id: "fiesch",
-    name: "Fieschergletscher",
-    region: "Bernese Alps, Valais",
-    lat: 46.4900, lng: 8.1400,
-    elevation: "1680–4049 m",
-    type: "Valley glacier",
-    description: "Stretching from the Finsteraarhorn towards the Rhone Valley, it is one of the major glaciers in the Bernese Alps. Its retreat has exposed new rocky terrain and created proglacial lakes.",
-    tags: ["Bernese Alps", "Valley glacier", "Finsteraarhorn"],
-    areaByYear: { 1973: 32.0, 1980: 31.0, 1985: 30.2, 1990: 29.2, 1995: 28.0, 2000: 26.8, 2005: 25.2, 2010: 23.5, 2015: 21.5, 2020: 19.5, 2025: 17.8 }
-  },
-  {
-    id: "unteraar",
-    name: "Unteraargletscher",
-    region: "Bernese Alps, Bern",
-    lat: 46.5700, lng: 8.2300,
-    elevation: "1930–3900 m",
-    type: "Valley glacier",
-    description: "Formed by the confluence of the Lauteraar and Finsteraar glaciers. It has been studied since the 1840s by Louis Agassiz and holds some of the oldest continuous glacier records in the world.",
-    tags: ["Scientific history", "Bernese Alps", "Agassiz studies"],
-    areaByYear: { 1973: 25.0, 1980: 24.2, 1985: 23.5, 1990: 22.7, 1995: 22.0, 2000: 21.0, 2005: 20.0, 2010: 18.8, 2015: 17.5, 2020: 16.0, 2025: 14.8 }
-  },
-  {
-    id: "rhone",
-    name: "Rhonegletscher",
-    region: "Urner Alps, Valais",
-    lat: 46.5833, lng: 8.3833,
-    elevation: "2140–3630 m",
-    type: "Valley glacier",
-    description: "The source of the Rhone River and a famous tourist destination. Its ice grotto has attracted visitors for over a century. The glacier has dramatically retreated, and blankets are now placed on it to slow the melt.",
-    tags: ["Rhone source", "Tourism", "Ice grotto", "Blanket protection"],
-    areaByYear: { 1973: 17.0, 1980: 16.5, 1985: 16.0, 1990: 15.4, 1995: 14.7, 2000: 13.9, 2005: 13.0, 2010: 12.0, 2015: 10.8, 2020: 9.6, 2025: 8.5 }
-  },
-  {
-    id: "findelen",
-    name: "Findelengletscher",
-    region: "Pennine Alps, Valais",
-    lat: 46.0053, lng: 7.7992,
-    elevation: "2560–3900 m",
-    type: "Valley glacier",
-    description: "A large glacier above Zermatt that feeds into the Findelbach stream. It is well known for its mass balance monitoring, which has provided key data for climate research.",
-    tags: ["Mass balance monitoring", "Zermatt", "Climate research"],
-    areaByYear: { 1973: 19.5, 1980: 19.0, 1985: 18.4, 1990: 17.8, 1995: 17.0, 2000: 16.0, 2005: 15.0, 2010: 13.8, 2015: 12.5, 2020: 11.2, 2025: 10.0 }
-  },
-  {
-    id: "morteratsch",
-    name: "Morteratschgletscher",
-    region: "Bernina Range, Graubünden",
-    lat: 46.4300, lng: 9.9340,
-    elevation: "2050–3900 m",
-    type: "Valley glacier",
-    description: "One of the most accessible glaciers in the Alps, located near Pontresina. The glacier trail with markers showing its historical positions is a powerful reminder of climate change in action.",
-    tags: ["Glacier trail", "Pontresina", "Tourism", "Bernina"],
-    areaByYear: { 1973: 16.5, 1980: 16.0, 1985: 15.5, 1990: 15.0, 1995: 14.3, 2000: 13.5, 2005: 12.5, 2010: 11.5, 2015: 10.3, 2020: 9.2, 2025: 8.2 }
-  },
-  {
-    id: "palue",
-    name: "Palügletscher",
-    region: "Bernina Range, Graubünden",
-    lat: 46.3730, lng: 10.0220,
-    elevation: "2450–3905 m",
-    type: "Mountain glacier",
-    description: "A dramatic icefall glacier that cascades down the north face of Piz Palü. Its three pillars of ice are one of the most photographed alpine scenes in Switzerland.",
-    tags: ["Icefall", "Piz Palü", "Photography", "Bernina"],
-    areaByYear: { 1973: 8.5, 1980: 8.2, 1985: 7.9, 1990: 7.5, 1995: 7.2, 2000: 6.8, 2005: 6.3, 2010: 5.7, 2015: 5.1, 2020: 4.5, 2025: 3.9 }
-  },
-  {
-    id: "trift",
-    name: "Triftgletscher",
-    region: "Bernese Alps, Bern",
-    lat: 46.7000, lng: 8.3600,
-    elevation: "1660–3400 m",
-    type: "Valley glacier",
-    description: "Formerly one of the most dramatic valley glaciers, it has retreated to create a stunning proglacial lake. A spectacular suspension bridge now spans the gorge where the glacier once flowed.",
-    tags: ["Proglacial lake", "Suspension bridge", "Dramatic retreat"],
-    areaByYear: { 1973: 18.0, 1980: 17.2, 1985: 16.5, 1990: 15.6, 1995: 14.6, 2000: 13.4, 2005: 12.0, 2010: 10.5, 2015: 9.0, 2020: 7.5, 2025: 6.3 }
-  },
-  {
-    id: "otemma",
-    name: "Glacier d'Otemma",
-    region: "Pennine Alps, Valais",
-    lat: 45.9500, lng: 7.4000,
-    elevation: "2600–3700 m",
-    type: "Valley glacier",
-    description: "A long, relatively flat valley glacier in the Val de Bagnes. Once one of the longest glaciers in the region, it has been splitting and fragmenting as it retreats upvalley.",
-    tags: ["Val de Bagnes", "Fragmenting", "Pennine Alps"],
-    areaByYear: { 1973: 17.5, 1980: 16.8, 1985: 16.0, 1990: 15.2, 1995: 14.3, 2000: 13.3, 2005: 12.2, 2010: 11.0, 2015: 9.8, 2020: 8.5, 2025: 7.4 }
-  },
-  {
-    id: "oberaletsch",
-    name: "Oberaletschgletscher",
-    region: "Bernese Alps, Valais",
-    lat: 46.4200, lng: 7.9900,
-    elevation: "2260–3700 m",
-    type: "Valley glacier",
-    description: "A significant tributary of the Aletsch glacier system. It flows southward from the Bernese Alps and has been retreating steadily, contributing to the overall loss of the Aletsch system.",
-    tags: ["Aletsch system", "Tributary", "Bernese Alps"],
-    areaByYear: { 1973: 22.5, 1980: 21.8, 1985: 21.0, 1990: 20.2, 1995: 19.2, 2000: 18.0, 2005: 16.8, 2010: 15.3, 2015: 13.8, 2020: 12.3, 2025: 11.0 }
-  },
-  {
-    id: "corbassiere",
-    name: "Glacier de Corbassière",
-    region: "Pennine Alps, Valais",
-    lat: 46.0000, lng: 7.2833,
-    elevation: "2250–4300 m",
-    type: "Valley glacier",
-    description: "Located below the Grand Combin, this is one of the largest glaciers in the western Pennine Alps. Its high-altitude accumulation area has slowed its retreat compared to lower-lying glaciers.",
-    tags: ["Grand Combin", "Western Pennine", "High altitude"],
-    areaByYear: { 1973: 18.0, 1980: 17.5, 1985: 17.0, 1990: 16.5, 1995: 16.0, 2000: 15.4, 2005: 14.7, 2010: 13.8, 2015: 12.8, 2020: 11.8, 2025: 10.8 }
-  },
-  {
-    id: "fee",
-    name: "Feegletscher",
-    region: "Pennine Alps, Valais",
-    lat: 46.1000, lng: 7.9167,
-    elevation: "1900–4200 m",
-    type: "Mountain glacier",
-    description: "Towering above the village of Saas-Fee, this glacier forms a dramatic amphitheatre of ice. The ski area operates year-round on its upper reaches, but the lower tongue has retreated significantly.",
-    tags: ["Saas-Fee", "Ski area", "Amphitheatre", "Tourism"],
-    areaByYear: { 1973: 17.0, 1980: 16.5, 1985: 16.0, 1990: 15.3, 1995: 14.5, 2000: 13.5, 2005: 12.5, 2010: 11.3, 2015: 10.0, 2020: 8.8, 2025: 7.8 }
-  },
-  {
-    id: "gauli",
-    name: "Gauligletscher",
-    region: "Bernese Alps, Bern",
-    lat: 46.6200, lng: 8.2200,
-    elevation: "2200–3600 m",
-    type: "Valley glacier",
-    description: "Famous for a dramatic 1946 emergency landing of a US military aircraft on its surface. A proglacial lake has formed as the glacier has retreated, now a popular destination for adventurous hikers.",
-    tags: ["1946 plane landing", "Proglacial lake", "Bernese Alps"],
-    areaByYear: { 1973: 13.0, 1980: 12.5, 1985: 12.0, 1990: 11.4, 1995: 10.7, 2000: 10.0, 2005: 9.2, 2010: 8.2, 2015: 7.2, 2020: 6.2, 2025: 5.4 }
-  },
-  {
-    id: "zinal",
-    name: "Glacier de Zinal",
-    region: "Pennine Alps, Valais",
-    lat: 46.0667, lng: 7.6333,
-    elevation: "2400–4200 m",
-    type: "Valley glacier",
-    description: "Nestled in the Val de Zinal, this glacier is surrounded by some of the most dramatic peaks in the Alps including the Weisshorn and Dent Blanche. Part of the iconic Haute Route skiing traverse.",
-    tags: ["Val de Zinal", "Haute Route", "Weisshorn"],
-    areaByYear: { 1973: 14.5, 1980: 14.0, 1985: 13.5, 1990: 12.9, 1995: 12.2, 2000: 11.3, 2005: 10.4, 2010: 9.4, 2015: 8.3, 2020: 7.2, 2025: 6.3 }
-  },
-  {
-    id: "tsanfleuron",
-    name: "Glacier de Tsanfleuron",
-    region: "Bernese Alps, Valais/Vaud",
-    lat: 46.3250, lng: 7.2750,
-    elevation: "2580–3000 m",
-    type: "Plateau glacier",
-    description: "A unique plateau glacier located in the Glacier 3000 ski area. Its retreat has revealed a mountain pass last exposed 2000 years ago, providing evidence of past warm periods.",
-    tags: ["Glacier 3000", "Plateau glacier", "Archaeological finds"],
-    areaByYear: { 1973: 5.5, 1980: 5.2, 1985: 4.9, 1990: 4.6, 1995: 4.3, 2000: 3.9, 2005: 3.5, 2010: 3.0, 2015: 2.5, 2020: 2.0, 2025: 1.5 }
-  },
-  {
-    id: "basodino",
-    name: "Ghiacciaio del Basòdino",
-    region: "Lepontine Alps, Ticino",
-    lat: 46.4100, lng: 8.4800,
-    elevation: "2650–3230 m",
-    type: "Cirque glacier",
-    description: "The southernmost glacier of significance in Switzerland, located in Ticino. It is one of the reference glaciers for studying climate change impacts on small alpine glaciers south of the main Alpine divide.",
-    tags: ["Ticino", "Southernmost", "Climate reference"],
-    areaByYear: { 1973: 3.2, 1980: 3.0, 1985: 2.8, 1990: 2.6, 1995: 2.3, 2000: 2.1, 2005: 1.8, 2010: 1.5, 2015: 1.2, 2020: 0.9, 2025: 0.7 }
-  },
-  {
-    id: "plaine_morte",
-    name: "Plaine Morte",
-    region: "Bernese Alps, Valais/Bern",
-    lat: 46.3850, lng: 7.5100,
-    elevation: "2650–2900 m",
-    type: "Plateau glacier",
-    description: "The largest plateau glacier in the European Alps. Its flat surface causes meltwater to collect in dangerous glacial lakes. In 2018 a glacial lake drained catastrophically, causing flooding downstream.",
-    tags: ["Plateau glacier", "Glacial lakes", "Flood risk", "Crans-Montana"],
-    areaByYear: { 1973: 10.0, 1980: 9.7, 1985: 9.4, 1990: 9.0, 1995: 8.6, 2000: 8.1, 2005: 7.5, 2010: 6.8, 2015: 6.0, 2020: 5.2, 2025: 4.5 }
-  },
-  {
-    id: "silvaplana",
-    name: "Vadret da Roseg",
-    region: "Bernina Range, Graubünden",
-    lat: 46.3850, lng: 9.8650,
-    elevation: "2250–3900 m",
-    type: "Valley glacier",
-    description: "A stunning glacier in the Roseg Valley near Pontresina. Its retreat has created a large proglacial lake with milky turquoise waters, one of the most beautiful in the Swiss Alps.",
-    tags: ["Roseg Valley", "Proglacial lake", "Pontresina", "Bernina"],
-    areaByYear: { 1973: 12.0, 1980: 11.6, 1985: 11.2, 1990: 10.7, 1995: 10.2, 2000: 9.5, 2005: 8.8, 2010: 8.0, 2015: 7.1, 2020: 6.2, 2025: 5.5 }
-  },
-  {
-    id: "griesgletscher",
-    name: "Griesgletscher",
-    region: "Lepontine Alps, Valais",
-    lat: 46.4400, lng: 8.3300,
-    elevation: "2400–3300 m",
-    type: "Valley glacier",
-    description: "Located at the Nufenen Pass area, this glacier feeds into the Griessee reservoir. Mass balance measurements have been conducted here since 1962, making it one of the longest-monitored glaciers in Switzerland.",
-    tags: ["Mass balance since 1962", "Nufenen Pass", "Reservoir"],
-    areaByYear: { 1973: 6.5, 1980: 6.2, 1985: 6.0, 1990: 5.7, 1995: 5.3, 2000: 5.0, 2005: 4.5, 2010: 4.0, 2015: 3.4, 2020: 2.8, 2025: 2.3 }
-  }
-];
-
 const flowData = {
   aletsch:       { dir: 210, len: 0.065 },
   gorner:        { dir: 290, len: 0.055 },
@@ -246,6 +22,12 @@ const flowData = {
 };
 
 // ── HELPERS ──
+const popup = document.getElementById('glacierPopup');
+const popupClose = document.getElementById('popupClose');
+const popupName = document.getElementById('popupName');
+let glacierMetadata = {};
+
+
 function interpolateArea(glacier, year) {
   const years = Object.keys(glacier.areaByYear).map(Number).sort((a,b)=>a-b);
   if (year <= years[0]) return glacier.areaByYear[years[0]];
@@ -275,6 +57,7 @@ function getMarkerSize(area) {
   return Math.max(10, Math.min(24, 8 + area * 0.2));
 }
 
+
 // ── MAP SETUP ──
 const map = L.map('map', {
   center: [46.55, 8.2],
@@ -295,70 +78,167 @@ L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/defau
   attribution: '&copy; <a href="https://www.swisstopo.admin.ch">swisstopo</a>'
 }).addTo(map);
 
-// ── MARKERS ──
-const markers = {};
-const tooltip = document.getElementById('mapTooltip');
 
-glaciers.forEach(g => {
-  const area = interpolateArea(g, 1973);
-  const size = getMarkerSize(area);
-  const color = getColor(g, 1973);
 
-  const icon = L.divIcon({
-    className: 'glacier-marker',
-    html: `<div class="marker-dot" style="width:${size}px;height:${size}px;background:${color};color:${color}" data-id="${g.id}"></div>
-           <div class="marker-label">${g.name.split('gletscher')[0].split('Glacier')[0].trim()}</div>`,
-    iconSize: [size, size],
-    iconAnchor: [size/2, size/2]
-  });
+// ── GEOJSON SETUP ──
+let currentGeojsonLayer = null;
+let globalBaselineArea = null;
+let activeGlacierSGI = null;
 
-  const marker = L.marker([g.lat, g.lng], { icon }).addTo(map);
+// Cache to store loaded GeoJSONs
+const geojsonCache = {}; 
 
-  marker.on('click', () => {
-    // Fly to the glacier
-    map.flyTo([g.lat, g.lng], 12, { duration: 0.8 });
+function getGlacierColor(feature, currentYear) {
+  const currentArea_km2 = (feature.properties.area_m2 || feature.properties.Shape_Area || 0) / 1000000;
+
+  // Look for 1850 data
+  if (currentYear !== 1850 && geojsonCache[1850]) {
+    const baselineFeature = geojsonCache[1850].features.find(f => f.properties.SGI === feature.properties.SGI);
     
-    // Draw the cool vector arrows directly on the map
-    const year = parseInt(document.getElementById('yearSlider').value);
-    drawVectorField(g, year);
-    
-    // Slide in the new minimalist panel!
-    openPopup(g);
-  });
-
-  markers[g.id] = marker;
-});
-
-// ── UPDATE MARKERS ──
-function updateMarkers(year) {
-  let totalArea = 0;
-  const initialTotal = glaciers.reduce((s,g) => s + g.areaByYear[1973], 0);
-
-  glaciers.forEach(g => {
-    const area = interpolateArea(g, year);
-    totalArea += area;
-    const size = getMarkerSize(area);
-    const color = getColor(g, year);
-
-    const marker = markers[g.id];
-    const el = marker.getElement();
-    if (el) {
-      const dot = el.querySelector('.marker-dot');
-      if (dot) {
-        dot.style.width = size + 'px';
-        dot.style.height = size + 'px';
-        dot.style.background = color;
-        dot.style.color = color;
+    if (baselineFeature) {
+      const baselineArea_km2 = (baselineFeature.properties.area_m2 || baselineFeature.properties.Shape_Area || 0) / 1000000;
+      
+      if (baselineArea_km2 > 0) {
+        const loss = ((baselineArea_km2 - currentArea_km2) / baselineArea_km2) * 100;
+        // Legend: color red if >50% loss
+        if (loss > 50) return 'var(--danger)';
       }
     }
-  });
+  }
 
-  document.getElementById('totalArea').textContent = totalArea.toFixed(0);
-  const change = ((totalArea - initialTotal) / initialTotal * 100).toFixed(1);
-  const changeEl = document.getElementById('totalChange');
-  changeEl.textContent = change + '%';
-  changeEl.style.color = change < 0 ? '#ff4d4d' : '#85c1e9'; // Adjusted colors
+  // Legend: color depending on size
+  if (currentArea_km2 > 30) return 'var(--glacier-deep)';
+  if (currentArea_km2 >= 10) return 'var(--glacier-mid)';
+  return 'var(--glacier-light)';
 }
+
+
+async function updateGlacierPolygons(year) {
+  year = parseInt(year);
+
+  if (currentGeojsonLayer) {
+    map.removeLayer(currentGeojsonLayer);
+  }
+
+  try {
+    let geojsonData = geojsonCache[year]
+
+    if (!geojsonData) {
+      const response = await fetch(`../data/glaciers_${year}.geojson`); 
+      if (!response.ok) throw new Error(`HTTP error. Status: ${response.status}`);
+      geojsonData = await response.json();
+      geojsonCache[year] = geojsonData;
+    }
+
+    // Draw new sheet
+    currentGeojsonLayer = L.geoJSON(geojsonData, {
+      style: function (feature) {
+        const isActive = feature.properties.SGI === activeGlacierSGI;
+        return {
+          stroke: isActive,
+          color: isActive ? '#042443' : undefined,
+          weight: isActive ? 1 : 0,
+          fillColor: getGlacierColor(feature, year),
+          fillOpacity: isActive ? 1 : 0.85
+        };
+      },
+      onEachFeature: function (feature, layer) {
+
+        if (feature.properties.SGI === activeGlacierSGI && !L.Browser.ie) {
+          setTimeout(() => layer.bringToFront(), 10);
+        }
+
+        // Click => focus on glacier + open popup
+        layer.on('click', () => {   
+          activeGlacierSGI = feature.properties.SGI;  
+
+          const glacierName = feature.properties['glacier name'] || `Glacier ${feature.properties.SGI}`;
+          openPopup({ name: glacierName });
+          map.flyToBounds(layer.getBounds(), { 
+            paddingTopLeft: [50, 50], 
+            paddingBottomRight: [350, 120], 
+            duration: 0.8 
+          });
+
+          updateGlacierPolygons(year);
+        });
+
+        // Hover => highlight border
+        layer.on('mouseover', function () {
+          if (feature.properties.SGI === activeGlacierSGI) return;
+
+          this.setStyle({ 
+            stroke: true,     
+            color: '#042443',
+            weight: 1, 
+            fillOpacity: 1
+          });
+          if (!L.Browser.ie) layer.bringToFront();
+        });
+        
+        layer.on('mouseout', function () {
+          if (feature.properties.SGI === activeGlacierSGI) return;
+          currentGeojsonLayer.resetStyle(this); 
+        });
+
+      }
+    }).addTo(map);
+
+    if (!activeGlacierSGI) {
+      map.fitBounds(currentGeojsonLayer.getBounds(), { padding: [20, 20] });
+    }
+
+    // Header Stats - area, count and change
+    let totalArea = 0;
+    let glacierCount = 0;
+    let baselineToCompare = null;
+
+    if (year === 1850 && globalBaselineArea === null) {
+      geojsonData.features.forEach(f => globalBaselineArea += (f.properties.area_m2 || f.properties.Shape_Area || 0) / 1000000);
+    }
+
+    if (activeGlacierSGI) {
+      // Glacier-focus statistics
+      const focusedFeature = geojsonData.features.find(f => f.properties.SGI === activeGlacierSGI);
+      if (focusedFeature) {
+        glacierCount = 1;
+        totalArea = (focusedFeature.properties.area_m2 || focusedFeature.properties.Shape_Area || 0) / 1000000;
+        
+        const baselineFeature = geojsonCache[1850]?.features.find(f => f.properties.SGI === activeGlacierSGI);
+        baselineToCompare = baselineFeature ? (baselineFeature.properties.area_m2 || baselineFeature.properties.Shape_Area || 0) / 1000000 : null;
+      }
+    } else {
+      // Whole-map statistics
+      glacierCount = geojsonData.features.length;
+      geojsonData.features.forEach(f => totalArea += (f.properties.area_m2 || f.properties.Shape_Area || 0) / 1000000);
+      baselineToCompare = globalBaselineArea;
+    }
+
+    document.getElementById('totalGlaciers').textContent = glacierCount;
+    document.getElementById('totalArea').textContent = totalArea.toFixed(1);
+
+    if (activeGlacierSGI && popup.classList.contains('open')) {
+      drawGlacierChart(activeGlacierSGI, year);
+    }
+    
+
+    const changeEl = document.getElementById('totalChange');
+    if (year === 1850) {
+      // If it's 1850, save globalBaselineArea
+      globalBaselineArea = totalArea;
+      changeEl.textContent = '0.0%';
+      changeEl.style.color = '#a0a0a0'; // Neutral gray
+    } else if (baselineToCompare) {
+      const change = ((totalArea - baselineToCompare) / baselineToCompare) * 100;
+      changeEl.textContent = (change > 0 ? '+' : '') + change.toFixed(1) + '%';
+      changeEl.style.color = change < 0 ? 'var(--danger)' : 'var(--accent-green)';
+    }
+
+  } catch (error) {
+    console.error(`Failed to load data for ${year}:`, error);
+  }
+}
+
 
 // ── VECTOR FLOW FIELD ──
 let vectorLayerGroup = L.layerGroup().addTo(map);
@@ -482,42 +362,184 @@ function drawVectorField(glacier, year) {
   vectorLayerGroup.addLayer(outline);
 }
 
+
 // ── YEAR SLIDER ──
+const availableYears = [1850, 1931, 1973, 2010, 2016];
 const yearSlider = document.getElementById('yearSlider');
 const yearDisplay = document.getElementById('yearDisplay');
-
 const ticks = document.getElementById('sliderTicks');
-for (let y = 1973; y <= 2025; y += 4) {
+
+ticks.innerHTML = ''; 
+availableYears.forEach((year, index) => {
   const tick = document.createElement('span');
   tick.className = 'slider-tick';
-  tick.textContent = y;
+  tick.textContent = year;
   tick.addEventListener('click', () => {
-    yearSlider.value = y;
-    onYearChange(y);
+    yearSlider.value = index;
+    onYearChange(index);
   });
   ticks.appendChild(tick);
-}
+});
 
-function onYearChange(year) {
-  yearDisplay.textContent = year;
-  updateMarkers(year);
+function onYearChange(sliderIndex) {
+  const actualYear = availableYears[sliderIndex];
+  yearDisplay.textContent = actualYear;
+  updateGlacierPolygons(actualYear);
 }
 
 yearSlider.addEventListener('input', (e) => onYearChange(parseInt(e.target.value)));
+onYearChange(parseInt(yearSlider.value));
+
 
 // ── MINIMAL POPUP LOGIC ──
-const popup = document.getElementById('glacierPopup');
-const popupClose = document.getElementById('popupClose');
-const popupName = document.getElementById('popupName');
+
+// ── SVG CHART ENGINE ──
+async function drawGlacierChart(sgi, currentYear) {
+  const container = document.getElementById('popupChartContainer');
+
+  container.innerHTML = '<div class="popup-placeholder">// Fetching historical records...</div>';
+  
+  // Extract data for this specific glacier
+  const data = [];
+  for (const y of availableYears) {
+    if (!geojsonCache[y]) {
+      try {
+        const response = await fetch(`../data/glaciers_${y}.geojson`);
+        if (response.ok) {
+          geojsonCache[y] = await response.json();
+        }
+      } catch (e) {
+        console.error(`[-] Failed to fetch ${y} for the chart.`);
+      }
+    }
+
+    if (geojsonCache[y]) {
+      const feat = geojsonCache[y].features.find(f => f.properties.SGI === sgi);
+      if (feat) {
+        const area_km2 = (feat.properties.area_m2 || feat.properties.Shape_Area || 0) / 1000000;
+        data.push({ year: y, area: area_km2 });
+      }
+    }
+  }
+
+  if (data.length < 2) {
+    container.innerHTML = '<div class="popup-placeholder">// Not enough historical data.</div>';
+    return;
+  }
+
+  // Setup Scales
+  const svgWidth = 400, svgHeight = 180;
+  const padLeft = 50, padRight = 20, padTop = 20, padBottom = 40;
+  const drawWidth = svgWidth - padLeft - padRight;   // 340px usable width
+  const drawHeight = svgHeight - padTop - padBottom; // 120px usable height
+
+  const minYear = 1850;
+  const maxYear = 2016;
+  
+  const maxArea = Math.max(...data.map(d => d.area));
+  const yMax = maxArea * 1.15; 
+
+  // Map: Translate data to pixel coordinates
+  const getX = (year) => padLeft + ((year - minYear) / (maxYear - minYear)) * drawWidth;
+  const getY = (area) => (padTop + drawHeight) - ((area / yMax) * drawHeight);
+
+  // Generate SVG Path Strings
+  const linePoints = data.map(d => `${getX(d.year)},${getY(d.area)}`).join(' ');
+  const polyPoints = `${getX(data[0].year)},${padTop + drawHeight} ${linePoints} ${getX(data[data.length-1].year)},${padTop + drawHeight}`;
+
+  // Generate Ticks (Top, Middle, Bottom)
+  const yTicks = [
+    { value: yMax, y: padTop },
+    { value: yMax / 2, y: padTop + (drawHeight / 2) },
+    { value: 0, y: padTop + drawHeight }
+  ];
+  let yAxisSVG = '';
+  yTicks.forEach(tick => {
+    yAxisSVG += `
+      <text x="0" y="${tick.y + 4}" class="chart-axis-text">${tick.value.toFixed(1)}</text>
+      <line x1="${padLeft - 20}" y1="${tick.y}" x2="${svgWidth - padRight}" y2="${tick.y}" class="chart-grid-line" />
+    `;
+  });
+
+  // Generate Data Points
+  let pointsSVG = '';
+  let xAxisSVG = '';
+  let activeIndicatorSVG = '';
+
+  data.forEach((d, index) => {
+    const cx = getX(d.year);
+    const cy = getY(d.area);
+    const isActive = d.year === currentYear;
+
+    const yOffset = (index % 2 === 0) ? 28 : 15;
+    xAxisSVG += `<text x="${cx}" y="${padTop + drawHeight + yOffset}" class="chart-axis-text" text-anchor="middle">${d.year}</text>`;
+    // If year present, highlight it
+    
+    if (isActive) {
+      activeIndicatorSVG = `
+        <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${padTop + drawHeight}" class="chart-active-line" />
+        <text x="${cx}" y="${cy - 12}" class="chart-active-text" text-anchor="middle">${d.area.toFixed(2)}</text>
+        <circle cx="${cx}" cy="${cy}" r="4.5" class="chart-active-point" />
+      `;
+    } else {
+      // Otherwise, just show regular points
+      pointsSVG += `<circle cx="${cx}" cy="${cy}" r="3" class="chart-point" />`;
+    }
+  });
+
+  // Build final SVG
+  container.innerHTML = `
+    <svg viewBox="0 0 ${svgWidth} ${svgHeight}" width="100%" height="100%" class="chart-svg">
+      <defs>
+        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--glacier-light, #85c1e9)" stop-opacity="0.4" />
+          <stop offset="100%" stop-color="var(--glacier-light, #85c1e9)" stop-opacity="0.0" />
+        </linearGradient>
+      </defs>
+      
+      ${yAxisSVG}
+      
+      <polygon points="${polyPoints}" fill="url(#areaGradient)" />
+      <polyline points="${linePoints}" class="chart-main-line" />
+      
+      ${xAxisSVG}
+      ${pointsSVG}
+      ${activeIndicatorSVG}
+    </svg>
+  `;
+}
 
 function openPopup(glacier) {
   popupName.textContent = glacier.name;
+
+  // Get location of the glacier
+  const locationEl = document.getElementById('popupLocation');
+  const data = glacierMetadata[activeGlacierSGI];
+  if (data) {
+    locationEl.innerHTML = `${data.range}, ${data.canton}`;
+  } else {
+    locationEl.innerHTML = `Swiss Alps`;
+  }
+
   popup.classList.add('open');
+  drawGlacierChart(activeGlacierSGI, parseInt(yearDisplay.textContent));
 }
 
 function closePopup() {
   popup.classList.remove('open');
-  clearVectorField(); // Clean up the map when closing!
+  clearVectorField();
+
+  // Unselect glacier
+  activeGlacierSGI = null;
+  updateGlacierPolygons(parseInt(yearDisplay.textContent));
+
+  // Zoom out to full map
+  if (currentGeojsonLayer) {
+    map.flyToBounds(currentGeojsonLayer.getBounds(), { 
+      padding: [20, 20], 
+      duration: 0.8 
+    });
+  }
 }
 
 popupClose.addEventListener('click', closePopup);
@@ -526,14 +548,83 @@ popupClose.addEventListener('click', closePopup);
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closePopup();
   if (e.key === 'ArrowLeft') {
-    yearSlider.value = Math.max(1973, parseInt(yearSlider.value) - 1);
+    yearSlider.value = Math.max(0, parseInt(yearSlider.value) - 1);
     onYearChange(parseInt(yearSlider.value));
   }
   if (e.key === 'ArrowRight') {
-    yearSlider.value = Math.min(2025, parseInt(yearSlider.value) + 1);
+    yearSlider.value = Math.min(4, parseInt(yearSlider.value) + 1);
     onYearChange(parseInt(yearSlider.value));
   }
 });
 
-// ── INIT ──
-updateMarkers(1973);
+
+// ── 7. INTERACTIVE CHART SCRUBBING ──
+const chartContainer = document.getElementById('popupChartContainer');
+let isScrubbing = false;
+
+chartContainer.style.cursor = 'pointer';
+
+function handleChartScrub(e) {
+  const rect = chartContainer.getBoundingClientRect();
+  if (rect.width === 0) return; // Safety check
+
+  const scaleX = 400 / rect.width;
+  const svgX = (e.clientX - rect.left) * scaleX;
+
+  const padLeft = 55, padRight = 20;
+  const drawWidth = 400 - padLeft - padRight;
+  const minYear = 1850, maxYear = 2016;
+
+  // From mouse position, find corresponding year on the chart
+  const hoveredYear = minYear + ((svgX - padLeft) / drawWidth) * (maxYear - minYear);
+
+  // Find closest available year
+  let closestIndex = 0;
+  let minDiff = Infinity;
+  
+  availableYears.forEach((y, index) => {
+    const diff = Math.abs(y - hoveredYear);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closestIndex = index;
+    }
+  });
+
+  // Update if different year
+  const slider = document.getElementById('yearSlider');
+  if (parseInt(slider.value) !== closestIndex) {
+    slider.value = closestIndex;
+    onYearChange(closestIndex);
+  }
+}
+
+// Attach the listeners to the permanent container
+chartContainer.addEventListener('pointerdown', (e) => {
+  isScrubbing = true;
+  chartContainer.setPointerCapture(e.pointerId);
+  handleChartScrub(e);
+});
+
+chartContainer.addEventListener('pointermove', (e) => {
+  if (isScrubbing) handleChartScrub(e);
+});
+
+chartContainer.addEventListener('pointerup', () => isScrubbing = false);
+chartContainer.addEventListener('pointercancel', () => isScrubbing = false);
+
+
+// ── INIT: BOOT SEQUENCE ──
+async function initApp() {
+  try {
+    const response = await fetch('../data/glaciers_location.json');
+    if (!response.ok) throw new Error("Location file not found");
+    
+    glacierMetadata = await response.json();
+  } catch (error) {
+    console.error("[-] Failed to load glacier location:", error);
+  }
+
+  onYearChange(parseInt(yearSlider.value) || 0);
+}
+
+initApp();

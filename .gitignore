@@ -1,0 +1,9 @@
+# Ignore virtual environments
+.venv
+
+# Ignore shapefiles
+*.shp
+*.dbf
+*.shx
+*.prj
+*.cpg

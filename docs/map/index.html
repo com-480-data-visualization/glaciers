@@ -51,7 +51,7 @@
     </div>
     <div class="map-legend-row" style="margin-top: 8px;">
       <div class="legend-dot" style="background:var(--danger)"></div>
-      <span>Critical retreat (&gt; 50% lost)</span>
+      <span>Critical loss (&gt; 50%)</span>
     </div>
   </div>
 
@@ -61,7 +61,7 @@
     <div class="slider-year" id="yearDisplay">1973</div>
   </div>
   <div class="slider-track-container">
-    <input type="range" id="yearSlider" min="1973" max="2025" value="1973" step="1" />
+    <input type="range" id="yearSlider" min="0" max="4" value="0" step="1" />
     <div class="slider-ticks" id="sliderTicks"></div>
   </div>
 </div>
@@ -89,9 +89,23 @@
   <div class="glacier-popup" id="glacierPopup">
     <button class="popup-close" id="popupClose">&times;</button>
     <div class="popup-hero-name" id="popupName">Glacier Name</div>
-    <div class="popup-placeholder">// Glacier data to precise.</div>
+    <div class="popup-placeholder" id="popupLocation">// Loading geographic data...</div>
 
     <div class="popup-chart" style="padding: 10px 0;">
+      <div class="popup-chart-title" style="font-size: 11px; font-weight: 700; color: var(--earth-500); margin-bottom: 15px; letter-spacing: 1.5px; text-transform: uppercase;">
+        Area Evolution (km²)
+      </div>
+      <div id="popupChartContainer"></div> 
+    </div>
+
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>
+<!-- 
+<div class="popup-chart" style="padding: 10px 0;">
       <div class="popup-chart-title" style="font-size: 11px; font-weight: 700; color: var(--earth-500, #888); margin-bottom: 15px; letter-spacing: 1.5px; text-transform: uppercase;">
         Area Evolution (km²)
       </div>
@@ -139,11 +153,4 @@
         <circle cx="340" cy="120" r="3" fill="#ffffff" stroke="var(--glacier-mid, #2e86c1)" stroke-width="1.5" />
       </svg>
     </div>
-    <div class="popup-placeholder">// This graph is a placeholder, to replace with real data</div>
-
-  </div>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="./script.js"></script>
-</body>
-</html>
+<div class="popup-placeholder">// This graph is a placeholder, to replace with real data</div> -->

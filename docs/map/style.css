@@ -13,6 +13,7 @@
   --earth-100: #ffffff; /* Card backgrounds */
   --earth-50:  #f4f6f8; /* Main background */
   
+  --glacier-border: #042443;
   --glacier-deep: #1a5276;
   --glacier-mid: #2e86c1;
   --glacier-light: #5dade2;
@@ -82,7 +83,7 @@ header {
 /* ── MAP ── */
 #map {
   position: fixed;
-  top: 66px; left: 0; right: 0; bottom: 0;
+  top: 62px; left: 0; right: 0; bottom: 0;
   z-index: 1;
 }
 
@@ -144,8 +145,8 @@ input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: 
 /* ── TOP LEFT LEGEND ── */
 .map-legend {
   position: fixed;
-  top: 90px;  /* Pushes it below your fixed header */
-  left: 20px;
+  top: 77px;  /* Pushes it below your fixed header */
+  left: 15px;
   z-index: 600; /* High enough to sit over the Leaflet map */
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
@@ -248,29 +249,29 @@ input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: 
 /* ── MINIMALIST DETAIL PANEL ── */
 .glacier-popup {
   position: fixed;
-  top: 0; 
-  right: -400px; /* Hidden off-screen by default */
-  width: 350px; 
-  height: 100vh;
+  top: 63px; 
+  bottom: 136px;
+  overflow-y: auto; /* Scrollable content */
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: -8px 0 32px rgba(0,0,0,0.08); /* Soft shadow bleeding onto the map */
+  right: -400px; /* Hidden off-screen by default */
+  width: 350px; 
+  border-radius: 12px;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  padding: 30px 40px;
+  box-shadow: -8px 0 32px rgba(0,0,0,0.08);
+  transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 2000;
-  transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Buttery smooth slide */
-  padding: 100px 30px 40px; /* Pushed down so it doesn't overlap the fixed header */
   display: flex;
   flex-direction: column;
 }
-
-/* The class we toggle with JavaScript */
 .glacier-popup.open {
   right: 0;
 }
-
 .popup-close {
   position: absolute;
-  top: 90px; 
+  top: 20px; 
   right: 20px;
   background: var(--earth-50);
   border: 1px solid var(--earth-200);
@@ -285,24 +286,106 @@ input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: 
   justify-content: center;
   transition: all 0.2s;
 }
-
 .popup-close:hover {
   background: var(--earth-200);
   color: var(--earth-900);
   transform: scale(1.1);
 }
-
 .popup-hero-name {
   font-family: 'DM Serif Display', serif;
-  font-size: 32px;
+  font-size: 28px;
   color: var(--earth-900);
   line-height: 1.1;
   margin-bottom: 20px;
 }
 
+
+/* ── Popup SVG Chart ── */
+.chart-svg {
+  overflow: visible;
+  display: block;
+}
+
+.chart-axis-text {
+  font-size: 10px;
+  fill: var(--earth-400, #a0a0a0);
+}
+
+.chart-grid-line {
+  stroke: var(--earth-200, #e5e5e5);
+  stroke-width: 1px;
+}
+
+.chart-main-line {
+  fill: none;
+  stroke: var(--glacier-mid);
+  stroke-width: 2.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-point {
+  fill: var(--earth-100, #ffffff);
+  stroke: var(--glacier-mid);
+  stroke-width: 1.5px;
+}
+
+.chart-active-line {
+  stroke: var(--accent-warm);
+  stroke-width: 1.5px;
+  stroke-dasharray: 4, 4;
+  opacity: 0.7;
+}
+
+.chart-active-text {
+  font-size: 11px;
+  fill: var(--accent-warm);
+  font-weight: 700; /* 700 is bold */
+}
+
+.chart-active-point {
+  fill: var(--accent-warm);
+  stroke: var(--earth-100, #ffffff);
+  stroke-width: 2px;
+}
+
+
+/* ── UI COMPONENTS: LOCATION BADGE ── */
 .popup-placeholder {
-  font-family: monospace; /* Gives it that cool coding aesthetic */
-  font-size: 14px;
-  color: var(--earth-500);
-  opacity: 0.6; /* Semi-transparent! */
+  display: inline-flex;
+  align-items: center;
+  gap: 15px; /* Spacing between icon and text */
+
+  width: 240px;
+  
+  background: var(--earth-300);
+  color: var(--earth-900);
+  opacity: 0.7;
+  
+  padding: 8px 16px;
+  border-radius: 18px; /* Rounded pill */
+  margin-bottom: 15px;
+  
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.popup-placeholder::before {
+  content: '';
+  display: block;
+  width: 14px;
+  height: 14px;
+
+  flex-shrink: 0;
+  
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E");
+  
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.9;
 }
