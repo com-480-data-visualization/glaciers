@@ -59,9 +59,21 @@ function getMarkerSize(area) {
 
 
 // ── MAP SETUP ──
+
+const swissBounds = L.latLngBounds(
+  [43.3, 5.7],  // South-West corner
+  [48.9, 11.0]  // North-East corner
+);
+
 const map = L.map('map', {
   center: [46.55, 8.2],
   zoom: 9,
+  minZoom: 7,
+  maxZoom: 16,
+
+  maxBounds: swissBounds, 
+  maxBoundsViscosity: 1.0,
+
   zoomControl: false,
   attributionControl: false
 });
@@ -75,6 +87,7 @@ L.control.attribution({ position: 'bottomright', prefix: false })
 // Swisstopo national map (free WMTS)
 L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg', {
   maxZoom: 18,
+  minZoom: 7,
   attribution: '&copy; <a href="https://www.swisstopo.admin.ch">swisstopo</a>'
 }).addTo(map);
 
@@ -224,8 +237,10 @@ async function updateGlacierPolygons(year) {
 
     const changeEl = document.getElementById('totalChange');
     if (year === 1850) {
-      // If it's 1850, save globalBaselineArea
-      globalBaselineArea = totalArea;
+      if (!activeGlacierSGI) {
+        globalBaselineArea = totalArea;
+      }
+
       changeEl.textContent = '0.0%';
       changeEl.style.color = '#a0a0a0'; // Neutral gray
     } else if (baselineToCompare) {
@@ -388,7 +403,6 @@ function onYearChange(sliderIndex) {
 }
 
 yearSlider.addEventListener('input', (e) => onYearChange(parseInt(e.target.value)));
-onYearChange(parseInt(yearSlider.value));
 
 
 // ── MINIMAL POPUP LOGIC ──
@@ -520,6 +534,10 @@ function openPopup(glacier) {
   } else {
     locationEl.innerHTML = `Swiss Alps`;
   }
+
+  // Open new Google Maps search in a new tab when clicking the location
+  const searchQuery = encodeURIComponent(glacier.name);
+  locationEl.href = `https://www.google.com/maps/place/${searchQuery}`
 
   popup.classList.add('open');
   drawGlacierChart(activeGlacierSGI, parseInt(yearDisplay.textContent));

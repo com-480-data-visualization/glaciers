@@ -373,6 +373,9 @@ input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  cursor: pointer;  /* Clickable style */
+  transition: opacity 0.2s, transform 0.2s;
 }
 .popup-placeholder::before {
   content: '';
@@ -388,4 +391,9 @@ input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: 
   background-repeat: no-repeat;
   background-position: center;
   opacity: 0.9;
+}
+.popup-placeholder:hover {
+  opacity: 1; 
+  transform: translateY(-2px);
+  background: var(--earth-200);
 }
