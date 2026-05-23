@@ -159,6 +159,7 @@ body {
     border-radius: 12px;
     border: 1px solid var(--border-color);
     box-shadow: 0 15px 35px rgba(0,0,0,0.5); /* Stronger shadow for depth in dark mode */
+    margin-bottom: 28px;
 }
 .iframe-card h3 {
     text-align: center;

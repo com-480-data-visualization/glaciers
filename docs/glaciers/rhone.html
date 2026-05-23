@@ -3,15 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grosser Rhonegletscher — Swiss Glaciers</title>
-  
+  <title>Rhonegletscher — Swiss Glaciers</title>
+
   <link rel="stylesheet" href="../style.css">
+
+  <style>
+    .glacier-hero {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .glacier-hero h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 3rem;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+    .glacier-region {
+      color: var(--accent-color);
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .glacier-stats-grid {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-box {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--glacier-light);
+      margin-bottom: 5px;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .glacier-description {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: #e0e0e0;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: var(--bg-card);
+      border-left: 4px solid var(--accent-color);
+      border-radius: 0 8px 8px 0;
+    }
+    .glacier-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+    .tag {
+      background: rgba(78, 168, 222, 0.1);
+      color: var(--accent-color);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid rgba(78, 168, 222, 0.3);
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .data-table th, .data-table td {
+      padding: 12px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+      color: #e0e0e0;
+    }
+    .data-table th {
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+    .data-table tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .back-btn:hover {
+      color: var(--accent-color);
+    }
+    .fun-fact {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 40px;
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .fun-fact-icon {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .fun-fact-content h4 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent-color);
+      margin: 0 0 8px 0;
+    }
+    .fun-fact-content p {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #e0e0e0;
+      margin: 0;
+    }
+  </style>
 </head>
 <body>
 
   <header>
     <div class="logo-area">
-      <div class="logo-icon"></div> 
+      <div class="logo-icon"></div>
       <div class="logo-text">
         <h1>COM-480: Swiss Glaciers</h1>
       </div>
@@ -19,30 +150,100 @@
   </header>
 
   <main class="scrolling-list">
-    
+
     <div style="max-width: 800px; margin: 0 auto; width: 100%;">
-      
+
       <a href="../index.html" class="back-btn">← Back to Overview</a>
-      
+
       <div class="glacier-hero">
-        <h2>Grosser Rhonegletscher</h2>
+        <h2>Rhonegletscher</h2>
+        <div class="glacier-region">Urner Alps, Valais</div>
       </div>
+
+      <div class="glacier-stats-grid">
+        <div class="stat-box">
+          <div class="stat-value">1880–3600 m</div>
+          <div class="stat-label">Elevation</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">Valley glacier</div>
+          <div class="stat-label">Type</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">13.6 km²</div>
+          <div class="stat-label">Est. Area (2023)</div>
+        </div>
+      </div>
+
+      <div class="glacier-description">
+        The Rhonegletscher located in the Swiss Alps, is the source of the Rhône river and one of the main feeders of Leman lake. <br />Easily accessible from the Furka Pass road, it has long been a popular tourist destination, and its ice grotto, carved directly into the glacier, has drawn visitors for over a century. Since 1850, however, the glacier has retreated dramatically, losing nearly 60% of its volume. To slow the melt, it is now partially covered with UV-resistant fleece blankets.
+      </div>
+
+      <div class="glacier-tags">
+        <span class="tag">Rhone source</span>
+        <span class="tag">Tourism</span>
+        <span class="tag">Ice grotto</span>
+        <span class="tag">Blanket protection</span>
+      </div>
+
+      <div class="fun-fact">
+        <div class="fun-fact-icon">💡</div>
+        <div class="fun-fact-content">
+          <h4>Fun Fact</h4>
+          <p>The glacier was the subject of a poem by Victor Hugo, <em>Dicté en présence du glacier du Rhône</em>, in the collection <em>Les Feuilles d'automne</em> (<em>Autumn Leaves</em>).</p>
+        </div>
+      </div>
+
+      <article class="iframe-card">
+        <h3>Length Change — Cumulative</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
+          Total cumulative retreat in meters since first observation.
+        </p>
+        <div id="chart-cumulative"></div>
+      </article>
+
+      <article class="iframe-card">
+        <h3>Length Change — Periodic</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
+          Annual length change (m) per measurement period.
+        </p>
+        <div id="chart-periodic"></div>
+      </article>
+
+      <article class="iframe-card">
+        <h3>Area Evolution (1973 - 2025)</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
+          Historical surface area measurements and calculated percentage loss relative to the 1973 baseline.
+        </p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Area (km²)</th>
+              <th>Total Loss</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1973</td><td>17.0</td><td>0.0%</td></tr>
+            <tr><td>1980</td><td>16.5</td><td style="color: var(--danger)">-2.9%</td></tr>
+            <tr><td>1985</td><td>16.0</td><td style="color: var(--danger)">-5.9%</td></tr>
+            <tr><td>1990</td><td>15.4</td><td style="color: var(--danger)">-9.4%</td></tr>
+            <tr><td>1995</td><td>14.7</td><td style="color: var(--danger)">-13.5%</td></tr>
+            <tr><td>2000</td><td>13.9</td><td style="color: var(--danger)">-18.2%</td></tr>
+            <tr><td>2005</td><td>13.0</td><td style="color: var(--danger)">-23.5%</td></tr>
+            <tr><td>2010</td><td>12.0</td><td style="color: var(--danger)">-29.4%</td></tr>
+            <tr><td>2015</td><td>10.8</td><td style="color: var(--danger)">-36.5%</td></tr>
+            <tr><td>2020</td><td>9.6</td><td style="color: var(--danger)">-43.5%</td></tr>
+            <tr><td>2025</td><td>8.5</td><td style="color: var(--danger)">-50.0%</td></tr>
+          </tbody>
+        </table>
+      </article>
+
     </div>
   </main>
 
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="glacier-charts.js"></script>
+  <script>renderGlacierCharts('rhone');</script>
 </body>
 </html>
-
-
-
-<!-- {
-  id: "rhone",
-  name: "Rhonegletscher",
-  region: "Urner Alps, Valais",
-  lat: 46.5833, lng: 8.3833,
-  elevation: "2140–3630 m",
-  type: "Valley glacier",
-  description: "The source of the Rhone River and a famous tourist destination. Its ice grotto has attracted visitors for over a century. The glacier has dramatically retreated, and blankets are now placed on it to slow the melt.",
-  tags: ["Rhone source", "Tourism", "Ice grotto", "Blanket protection"],
-  areaByYear: { 1973: 17.0, 1980: 16.5, 1985: 16.0, 1990: 15.4, 1995: 14.7, 2000: 13.9, 2005: 13.0, 2010: 12.0, 2015: 10.8, 2020: 9.6, 2025: 8.5 }
-}, -->
