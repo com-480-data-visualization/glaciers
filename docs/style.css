@@ -32,7 +32,7 @@
     --text-main: #1f1d1d;       /* Soft white for readability */
     --text-muted: #a0a0a0;      /* Gray for secondary text */
     --accent-color: #4ea8de;    /* A sleek "data" blue for links/highlights */
-    --border-color: var(--earth-700);
+    --border-color: var(--earth-600);
   }
 
 /* --- 2. Basic Reset --- */
@@ -44,7 +44,7 @@
 
 header {
     position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-    background: linear-gradient(135deg, var(--earth-800) 0%, var(--earth-700) 100%);
+    background: linear-gradient(135deg, var(--earth-700) 0%, var(--earth-600) 100%);
     padding: 14px 28px;
     display: flex; align-items: center; justify-content: space-between;
     box-shadow: var(--shadow-lg);
@@ -154,7 +154,7 @@ body {
 
 /* --- 6. The iFrame Containers --- */
 .iframe-card {
-    background: linear-gradient(135deg, var(--earth-800) 0%, var(--earth-700) 100%);
+    background: linear-gradient(135deg, var(--earth-700) 0%, var(--earth-600) 100%);
     padding: 20px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
@@ -185,7 +185,7 @@ body {
 
 .clickable-box {
     flex: 1; /* Makes all three boxes equally wide */
-    background: linear-gradient(135deg, var(--earth-800) 0%, var(--earth-700) 100%);
+    background: linear-gradient(135deg, var(--earth-700) 0%, var(--earth-600) 100%);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 30px 20px;

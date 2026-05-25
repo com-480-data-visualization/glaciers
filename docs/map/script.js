@@ -45,7 +45,7 @@ const swissBounds = L.latLngBounds(
 
 const map = L.map('map', {
   center: [46.55, 8.2],
-  zoom: 9,
+  zoom: 8,
   minZoom: 7,
   maxZoom: 16,
 

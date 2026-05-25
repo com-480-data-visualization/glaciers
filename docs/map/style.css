@@ -161,7 +161,7 @@ input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: 
   cursor: pointer;
   transition: color 0.2s;
 }
-.slider-tick:hover { color: var(--earth-700); }
+.slider-tick:hover { color: var(--earth-600); }
 
 /* ── TOP LEFT LEGEND ── */
 .map-legend {
@@ -195,7 +195,7 @@ input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: 
   gap: 10px;
   margin-bottom: 8px;
   font-size: 11px;
-  color: var(--earth-800);
+  color: var(--earth-700);
   font-weight: 500;
 }
 
