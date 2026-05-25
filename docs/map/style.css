@@ -112,6 +112,27 @@ header {
   font-size: 32px; color: var(--earth-800);
   min-width: 80px; text-align: center;
 }
+.slider-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* This controls the distance between the button and the year */
+}
+.play-btn {
+  background: var(--glacier-light);
+  color: var(--earth-100);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  margin-right: 10px;
+}
+.play-btn:hover { transform: scale(1.1); }
+.play-btn svg { transition: all 0.2s; }
 
 .slider-track-container { position: relative; padding: 0 4px; }
 input[type="range"] {

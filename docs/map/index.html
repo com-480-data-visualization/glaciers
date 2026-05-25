@@ -58,10 +58,18 @@
   <div class="slider-panel">
   <div class="slider-header">
     <div class="slider-label">Timeline</div>
-    <div class="slider-year" id="yearDisplay">1973</div>
+    
+    <div class="slider-controls">
+      <button id="playBtn" class="play-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path id="icon" d="M8 5v14l11-7z" />
+        </svg>
+      </button>
+      <div class="slider-year" id="yearDisplay">1850</div>
+    </div>
   </div>
   <div class="slider-track-container">
-    <input type="range" id="yearSlider" min="0" max="4" value="0" step="1" />
+    <input type="range" id="yearSlider" min="1850" max="2016" value="1850" step="1" />
     <div class="slider-ticks" id="sliderTicks"></div>
   </div>
 </div>

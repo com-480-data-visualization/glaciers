@@ -1,25 +1,3 @@
-const flowData = {
-  aletsch:       { dir: 210, len: 0.065 },
-  gorner:        { dir: 290, len: 0.055 },
-  fiesch:        { dir: 200, len: 0.050 },
-  unteraar:      { dir: 250, len: 0.048 },
-  rhone:         { dir: 270, len: 0.045 },
-  findelen:      { dir: 310, len: 0.042 },
-  morteratsch:   { dir: 350, len: 0.044 },
-  palue:         { dir:  0, len: 0.035 },
-  trift:         { dir: 340, len: 0.048 },
-  otemma:        { dir: 280, len: 0.046 },
-  oberaletsch:   { dir: 180, len: 0.050 },
-  corbassiere:   { dir: 200, len: 0.045 },
-  fee:           { dir: 240, len: 0.040 },
-  gauli:         { dir: 320, len: 0.042 },
-  zinal:         { dir: 340, len: 0.043 },
-  tsanfleuron:   { dir: 260, len: 0.030 },
-  basodino:      { dir: 180, len: 0.028 },
-  plaine_morte:  { dir: 240, len: 0.032 },
-  silvaplana:    { dir: 350, len: 0.040 },
-  griesgletscher:{ dir: 220, len: 0.035 }
-};
 
 // ── HELPERS ──
 const popup = document.getElementById('glacierPopup');
@@ -88,7 +66,7 @@ L.control.attribution({ position: 'bottomright', prefix: false })
 L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg', {
   maxZoom: 18,
   minZoom: 7,
-  attribution: '&copy; <a href="https://www.swisstopo.admin.ch">swisstopo</a>'
+  attribution: '© <a href="https://www.swisstopo.admin.ch">swisstopo</a>'
 }).addTo(map);
 
 
@@ -126,104 +104,123 @@ function getGlacierColor(feature, currentYear) {
 }
 
 
+// Keep track of our two layers globally to fade them
+let layerY0 = null;
+let layerY1 = null;
+
 async function updateGlacierPolygons(year) {
   year = parseInt(year);
+  const lerp = getLerp(year);
+  const y0 = lerp.y0;
+  const y1 = lerp.y1;
 
-  if (currentGeojsonLayer) {
-    map.removeLayer(currentGeojsonLayer);
-  }
+  // 1. Remove old layers
+  if (layerY0) map.removeLayer(layerY0);
+  if (layerY1) map.removeLayer(layerY1);
 
   try {
-    let geojsonData = geojsonCache[year]
-
-    if (!geojsonData) {
-      const response = await fetch(`../data/glaciers_${year}.geojson`); 
-      if (!response.ok) throw new Error(`HTTP error. Status: ${response.status}`);
-      geojsonData = await response.json();
-      geojsonCache[year] = geojsonData;
-    }
-
-    // Draw new sheet
-    currentGeojsonLayer = L.geoJSON(geojsonData, {
-      style: function (feature) {
-        const isActive = feature.properties.SGI === activeGlacierSGI;
-        return {
-          stroke: isActive,
-          color: isActive ? '#042443' : undefined,
-          weight: isActive ? 1 : 0,
-          fillColor: getGlacierColor(feature, year),
-          fillOpacity: isActive ? 1 : 0.85
-        };
-      },
-      onEachFeature: function (feature, layer) {
-
-        if (feature.properties.SGI === activeGlacierSGI && !L.Browser.ie) {
-          setTimeout(() => layer.bringToFront(), 10);
-        }
-
-        // Click => focus on glacier + open popup
-        layer.on('click', () => {   
-          activeGlacierSGI = feature.properties.SGI;  
-
-          const glacierName = feature.properties['glacier name'] || `Glacier ${feature.properties.SGI}`;
-          openPopup({ name: glacierName });
-          map.flyToBounds(layer.getBounds(), { 
-            paddingTopLeft: [50, 50], 
-            paddingBottomRight: [350, 120], 
-            duration: 0.8 
-          });
-
-          updateGlacierPolygons(year);
-        });
-
-        // Hover => highlight border
-        layer.on('mouseover', function () {
-          if (feature.properties.SGI === activeGlacierSGI) return;
-
-          this.setStyle({ 
-            stroke: true,     
-            color: '#042443',
-            weight: 1, 
-            fillOpacity: 1
-          });
-          if (!L.Browser.ie) layer.bringToFront();
-        });
-        
-        layer.on('mouseout', function () {
-          if (feature.properties.SGI === activeGlacierSGI) return;
-          currentGeojsonLayer.resetStyle(this); 
-        });
-
+    // Ensure both anchors are in cache
+    for (const y of [y0, y1]) {
+      if (!geojsonCache[y]) {
+        const response = await fetch(`../data/glaciers_${y}.geojson`);
+        if (!response.ok) throw new Error(`HTTP error. Status: ${response.status}`);
+        geojsonCache[y] = await response.json();
       }
-    }).addTo(map);
-
-    if (!activeGlacierSGI) {
-      map.fitBounds(currentGeojsonLayer.getBounds(), { padding: [20, 20] });
     }
 
-    // Header Stats - area, count and change
+    const dataY0 = geojsonCache[y0];
+    const dataY1 = geojsonCache[y1];
+
+    // Helper to keep style and interactions DRY (Don't Repeat Yourself)
+    const createGlacierLayer = (data, targetYear, opacity) => {
+      return L.geoJSON(data, {
+        style: (feature) => {
+          const isActive = feature.properties.SGI === activeGlacierSGI;
+          return {
+            stroke: isActive,
+            color: isActive ? '#042443' : undefined,
+            weight: isActive ? 1 : 0,
+            fillColor: getGlacierColor(feature, targetYear),
+            // Apply opacity logic: mix base opacity (0.85) with current lerp fade
+            fillOpacity: isActive ? 1 : (0.85 * opacity)
+          };
+        },
+        onEachFeature: (feature, layer) => {
+          if (feature.properties.SGI === activeGlacierSGI && !L.Browser.ie) {
+            setTimeout(() => layer.bringToFront(), 10);
+          }
+
+          // Click => focus on glacier + open popup
+          layer.on('click', () => {
+            activeGlacierSGI = feature.properties.SGI;
+            const glacierName = feature.properties['glacier name'] || `Glacier ${feature.properties.SGI}`;
+            openPopup({ name: glacierName });
+            map.flyToBounds(layer.getBounds(), {
+              paddingTopLeft: [50, 50],
+              paddingBottomRight: [350, 120],
+              duration: 0.8
+            });
+            updateGlacierPolygons(year);
+          });
+
+          // Hover => highlight border
+          layer.on('mouseover', function () {
+            if (feature.properties.SGI === activeGlacierSGI) return;
+            this.setStyle({
+              stroke: true,
+              color: '#042443',
+              weight: 1,
+              fillOpacity: 1
+            });
+            if (!L.Browser.ie) layer.bringToFront();
+          });
+
+          layer.on('mouseout', function (e) {
+            if (feature.properties.SGI === activeGlacierSGI) return;
+            
+            e.target.setStyle({
+              stroke: false,
+              weight: 0,
+              fillColor: getGlacierColor(feature, targetYear), // Re-fetch correct color
+              fillOpacity: opacity // Use the current lerp opacity directly
+            });
+          });
+        }
+      });
+    };
+
+    // 2. Render both layers with cross-fade logic
+    layerY0 = createGlacierLayer(dataY0, y0, (1 - lerp.t)).addTo(map);
+    if (lerp.t > 0) {
+      layerY1 = createGlacierLayer(dataY1, y1, lerp.t).addTo(map);
+    }
+
+    // 3. Header Stats logic (preserving your exact interpolation logic)
     let totalArea = 0;
     let glacierCount = 0;
     let baselineToCompare = null;
 
     if (year === 1850 && globalBaselineArea === null) {
-      geojsonData.features.forEach(f => globalBaselineArea += (f.properties.area_m2 || f.properties.Shape_Area || 0) / 1000000);
+      dataY0.features.forEach(f => globalBaselineArea += (f.properties.area_m2 || f.properties.Shape_Area || 0) / 1000000);
     }
 
     if (activeGlacierSGI) {
-      // Glacier-focus statistics
-      const focusedFeature = geojsonData.features.find(f => f.properties.SGI === activeGlacierSGI);
-      if (focusedFeature) {
+      const focusedFeature0 = dataY0.features.find(f => f.properties.SGI === activeGlacierSGI);
+      const targetFeature1 = dataY1.features.find(f => f.properties.SGI === activeGlacierSGI) || focusedFeature0;
+
+      if (focusedFeature0) {
         glacierCount = 1;
-        totalArea = (focusedFeature.properties.area_m2 || focusedFeature.properties.Shape_Area || 0) / 1000000;
-        
+        const area0 = (focusedFeature0.properties.area_m2 || focusedFeature0.properties.Shape_Area || 0) / 1000000;
+        const area1 = (targetFeature1.properties.area_m2 || targetFeature1.properties.Shape_Area || 0) / 1000000;
+        totalArea = area0 + lerp.t * (area1 - area0);
         const baselineFeature = geojsonCache[1850]?.features.find(f => f.properties.SGI === activeGlacierSGI);
         baselineToCompare = baselineFeature ? (baselineFeature.properties.area_m2 || baselineFeature.properties.Shape_Area || 0) / 1000000 : null;
       }
     } else {
-      // Whole-map statistics
-      glacierCount = geojsonData.features.length;
-      geojsonData.features.forEach(f => totalArea += (f.properties.area_m2 || f.properties.Shape_Area || 0) / 1000000);
+      glacierCount = dataY0.features.length;
+      let sum0 = 0; dataY0.features.forEach(f => sum0 += (f.properties.area_m2 || f.properties.Shape_Area || 0) / 1000000);
+      let sum1 = 0; dataY1.features.forEach(f => sum1 += (f.properties.area_m2 || f.properties.Shape_Area || 0) / 1000000);
+      totalArea = sum0 + lerp.t * (sum1 - sum0);
       baselineToCompare = globalBaselineArea;
     }
 
@@ -233,16 +230,12 @@ async function updateGlacierPolygons(year) {
     if (activeGlacierSGI && popup.classList.contains('open')) {
       drawGlacierChart(activeGlacierSGI, year);
     }
-    
 
     const changeEl = document.getElementById('totalChange');
     if (year === 1850) {
-      if (!activeGlacierSGI) {
-        globalBaselineArea = totalArea;
-      }
-
+      if (!activeGlacierSGI) globalBaselineArea = totalArea;
       changeEl.textContent = '0.0%';
-      changeEl.style.color = '#a0a0a0'; // Neutral gray
+      changeEl.style.color = '#a0a0a0';
     } else if (baselineToCompare) {
       const change = ((totalArea - baselineToCompare) / baselineToCompare) * 100;
       changeEl.textContent = (change > 0 ? '+' : '') + change.toFixed(1) + '%';
@@ -265,141 +258,53 @@ function clearVectorField() {
   if (vectorAnimFrame) cancelAnimationFrame(vectorAnimFrame);
 }
 
-function drawVectorField(glacier, year) {
-  clearVectorField();
-  const fd = flowData[glacier.id];
-  if (!fd) return;
-
-  document.getElementById('vectorLegend').classList.add('visible');
-
-  const area = interpolateArea(glacier, year);
-  const initial = glacier.areaByYear[1973];
-  const meltRatio = Math.max(0, (initial - area) / initial);
-
-  const flowRad = (fd.dir - 90) * Math.PI / 180; 
-  const areaScale = Math.sqrt(area / initial);
-  const baseRadius = fd.len * 1.3 * areaScale;
-  const aspectRatio = 1.8; 
-
-  const numArrows = 32; 
-  const arrows = [];
-
-  for (let i = 0; i < numArrows; i++) {
-    const theta = (i / numArrows) * Math.PI * 2; 
-
-    const localX = Math.cos(theta) * baseRadius * aspectRatio; 
-    const localY = Math.sin(theta) * baseRadius;              
-
-    const cosF = Math.cos(flowRad);
-    const sinF = Math.sin(flowRad);
-    const dLat = localX * sinF + localY * cosF;
-    const dLng = (localX * cosF - localY * sinF) * 1.4;
-
-    const seed = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-    const seed2 = Math.sin(i * 269.5 + 183.3) * 43758.5453;
-    const jLat = ((seed - Math.floor(seed)) - 0.5) * baseRadius * 0.15;
-    const jLng = ((seed2 - Math.floor(seed2)) - 0.5) * baseRadius * 0.15 * 1.4;
-
-    const lat = glacier.lat + dLat + jLat;
-    const lng = glacier.lng + dLng + jLng;
-
-    const toCenterAngle = Math.atan2(glacier.lat - lat, (glacier.lng - lng) / 1.4);
-
-    const ptAngle = Math.atan2(dLat, dLng / 1.4);
-    const downstream = 0.5 + 0.5 * Math.cos(ptAngle - flowRad);
-    const lateral = Math.abs(Math.sin(ptAngle - flowRad));
-
-    let type, color;
-
-    if (downstream > 0.7 && meltRatio > 0.03) {
-      type = 'melt';
-      color = '#e74c3c'; 
-    } else if (lateral > 0.55) {
-      type = 'lateral';
-      color = '#e67e22'; 
-    } else {
-      type = 'flow';
-      color = '#2980b9'; 
-    }
-
-    const intensity = 0.006;
-    const endLat = lat + Math.sin(toCenterAngle) * intensity;
-    const endLng = lng + Math.cos(toCenterAngle) * intensity * 1.4;
-
-    arrows.push({ lat, lng, endLat, endLng, angle: toCenterAngle, color, type, intensity });
-  }
-
-  arrows.forEach((a) => {
-    const pts = [[a.lat, a.lng], [a.endLat, a.endLng]];
-
-    vectorLayerGroup.addLayer(L.polyline(pts, {
-      color: '#ffffff', weight: 5, opacity: 0.35, lineCap: 'round'
-    }));
-    vectorLayerGroup.addLayer(L.polyline(pts, {
-      color: a.color, weight: 3, opacity: 1, lineCap: 'round'
-    }));
-
-    const headLen = 0.004;
-    const a1 = a.angle + Math.PI * 0.65;
-    const a2 = a.angle - Math.PI * 0.65;
-    const h1 = [a.endLat + Math.sin(a1)*headLen, a.endLng + Math.cos(a1)*headLen*1.4];
-    const h2 = [a.endLat + Math.sin(a2)*headLen, a.endLng + Math.cos(a2)*headLen*1.4];
-    const tip = [a.endLat, a.endLng];
-
-    vectorLayerGroup.addLayer(L.polyline([h1, tip, h2], {
-      color: '#ffffff', weight: 5, opacity: 0.35, lineCap: 'round', lineJoin: 'round'
-    }));
-    vectorLayerGroup.addLayer(L.polyline([h1, tip, h2], {
-      color: a.color, weight: 3, opacity: 1, lineCap: 'round', lineJoin: 'round'
-    }));
-  });
-
-  const outlinePoints = [];
-  for (let i = 0; i <= 64; i++) {
-    const theta = (i / 64) * Math.PI * 2;
-    const localX = Math.cos(theta) * baseRadius * aspectRatio;
-    const localY = Math.sin(theta) * baseRadius;
-    const cosF = Math.cos(flowRad);
-    const sinF = Math.sin(flowRad);
-    const dLat = localX * sinF + localY * cosF;
-    const dLng = (localX * cosF - localY * sinF) * 1.4;
-    outlinePoints.push([glacier.lat + dLat, glacier.lng + dLng]);
-  }
-  const outline = L.polyline(outlinePoints, {
-    color: '#2980b9',
-    weight: 2.5,
-    opacity: 0.6,
-    dashArray: '8,5',
-    fill: true,
-    fillColor: 'rgba(133,193,233,0.1)',
-    fillOpacity: 1
-  });
-  vectorLayerGroup.addLayer(outline);
-}
-
 
 // ── YEAR SLIDER ──
 const availableYears = [1850, 1931, 1973, 2010, 2016];
+
+function getLerp(targetYear) {
+  if (availableYears.includes(targetYear)) {
+    return { y0: targetYear, y1: targetYear, t: 0 };
+  }
+  let y0 = availableYears[0];
+  let y1 = availableYears[availableYears.length - 1];
+  for (let i = 0; i < availableYears.length - 1; i++) {
+    if (targetYear > availableYears[i] && targetYear < availableYears[i+1]) {
+      y0 = availableYears[i];
+      y1 = availableYears[i+1];
+      break;
+    }
+  }
+  const t = (targetYear - y0) / (y1 - y0);
+  return { y0, y1, t };
+}
+
 const yearSlider = document.getElementById('yearSlider');
 const yearDisplay = document.getElementById('yearDisplay');
 const ticks = document.getElementById('sliderTicks');
 
+const displayTicks = [];
+for (let i = 0; i <= 12; i++) {
+  displayTicks.push(Math.round(1850 + i * ((2016 - 1850) / 12)));
+}
+
 ticks.innerHTML = ''; 
-availableYears.forEach((year, index) => {
+displayTicks.forEach((year) => {
   const tick = document.createElement('span');
   tick.className = 'slider-tick';
   tick.textContent = year;
+  
   tick.addEventListener('click', () => {
-    yearSlider.value = index;
-    onYearChange(index);
+    yearSlider.value = year;
+    onYearChange(year);
   });
+  
   ticks.appendChild(tick);
 });
 
-function onYearChange(sliderIndex) {
-  const actualYear = availableYears[sliderIndex];
-  yearDisplay.textContent = actualYear;
-  updateGlacierPolygons(actualYear);
+function onYearChange(targetYear) {
+  yearDisplay.textContent = targetYear;
+  updateGlacierPolygons(targetYear);
 }
 
 yearSlider.addEventListener('input', (e) => onYearChange(parseInt(e.target.value)));
@@ -483,23 +388,35 @@ async function drawGlacierChart(sgi, currentYear) {
   data.forEach((d, index) => {
     const cx = getX(d.year);
     const cy = getY(d.area);
-    const isActive = d.year === currentYear;
 
     const yOffset = (index % 2 === 0) ? 28 : 15;
     xAxisSVG += `<text x="${cx}" y="${padTop + drawHeight + yOffset}" class="chart-axis-text" text-anchor="middle">${d.year}</text>`;
-    // If year present, highlight it
     
-    if (isActive) {
-      activeIndicatorSVG = `
-        <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${padTop + drawHeight}" class="chart-active-line" />
-        <text x="${cx}" y="${cy - 12}" class="chart-active-text" text-anchor="middle">${d.area.toFixed(2)}</text>
-        <circle cx="${cx}" cy="${cy}" r="4.5" class="chart-active-point" />
-      `;
-    } else {
-      // Otherwise, just show regular points
-      pointsSVG += `<circle cx="${cx}" cy="${cy}" r="3" class="chart-point" />`;
-    }
+    // Otherwise, just show regular points
+    pointsSVG += `<circle cx="${cx}" cy="${cy}" r="3" class="chart-point" />`;
   });
+
+  // If year present, highlight it (now perfectly interpolated!)
+  const lerp = getLerp(currentYear);
+  const currentX = getX(currentYear);
+  
+  const d0 = data.find(d => d.year === lerp.y0);
+  const d1 = data.find(d => d.year === lerp.y1);
+  
+  let currentArea = 0;
+  if (d0 && d1) {
+    currentArea = d0.area + lerp.t * (d1.area - d0.area);
+  } else if (d0) {
+    currentArea = d0.area;
+  }
+  
+  const currentY = getY(currentArea);
+
+  activeIndicatorSVG = `
+    <line x1="${currentX}" y1="${currentY}" x2="${currentX}" y2="${padTop + drawHeight}" class="chart-active-line" />
+    <text x="${currentX}" y="${currentY - 12}" class="chart-active-text" text-anchor="middle">${currentArea.toFixed(2)}</text>
+    <circle cx="${currentX}" cy="${currentY}" r="4.5" class="chart-active-point" />
+  `;
 
   // Build final SVG
   container.innerHTML = `
@@ -537,7 +454,7 @@ function openPopup(glacier) {
 
   // Open new Google Maps search in a new tab when clicking the location
   const searchQuery = encodeURIComponent(glacier.name);
-  locationEl.href = `https://www.google.com/maps/place/${searchQuery}`
+  locationEl.href = `https://www.google.com/maps/place/${searchQuery}`;
 
   popup.classList.add('open');
   drawGlacierChart(activeGlacierSGI, parseInt(yearDisplay.textContent));
@@ -552,12 +469,11 @@ function closePopup() {
   updateGlacierPolygons(parseInt(yearDisplay.textContent));
 
   // Zoom out to full map
-  if (currentGeojsonLayer) {
-    map.flyToBounds(currentGeojsonLayer.getBounds(), { 
-      padding: [20, 20], 
-      duration: 0.8 
-    });
-  }
+  map.flyTo(
+    [46.55, 8.2], 
+    9, 
+    { duration: 0.8 }
+  );
 }
 
 popupClose.addEventListener('click', closePopup);
@@ -565,12 +481,17 @@ popupClose.addEventListener('click', closePopup);
 // ── KEYBOARD SHORTCUTS ──
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closePopup();
+  // Spacebar toggles timeline play/pause
+  if (e.key === ' ' || e.code === 'Space') {
+    e.preventDefault(); 
+    togglePlay();       
+  }
   if (e.key === 'ArrowLeft') {
-    yearSlider.value = Math.max(0, parseInt(yearSlider.value) - 1);
+    yearSlider.value = Math.max(1850, parseInt(yearSlider.value) - 1);
     onYearChange(parseInt(yearSlider.value));
   }
   if (e.key === 'ArrowRight') {
-    yearSlider.value = Math.min(4, parseInt(yearSlider.value) + 1);
+    yearSlider.value = Math.min(2016, parseInt(yearSlider.value) + 1);
     onYearChange(parseInt(yearSlider.value));
   }
 });
@@ -596,23 +517,13 @@ function handleChartScrub(e) {
   // From mouse position, find corresponding year on the chart
   const hoveredYear = minYear + ((svgX - padLeft) / drawWidth) * (maxYear - minYear);
 
-  // Find closest available year
-  let closestIndex = 0;
-  let minDiff = Infinity;
-  
-  availableYears.forEach((y, index) => {
-    const diff = Math.abs(y - hoveredYear);
-    if (diff < minDiff) {
-      minDiff = diff;
-      closestIndex = index;
-    }
-  });
-
   // Update if different year
   const slider = document.getElementById('yearSlider');
-  if (parseInt(slider.value) !== closestIndex) {
-    slider.value = closestIndex;
-    onYearChange(closestIndex);
+  const scrubYear = Math.round(hoveredYear);
+  
+  if (parseInt(slider.value) !== scrubYear && scrubYear >= minYear && scrubYear <= maxYear) {
+    slider.value = scrubYear;
+    onYearChange(scrubYear);
   }
 }
 
@@ -634,15 +545,69 @@ chartContainer.addEventListener('pointercancel', () => isScrubbing = false);
 // ── INIT: BOOT SEQUENCE ──
 async function initApp() {
   try {
-    const response = await fetch('../data/glaciers_location.json');
-    if (!response.ok) throw new Error("Location file not found");
+    const locRes = await fetch('../data/glaciers_location.json');
+    if (locRes.ok) glacierMetadata = await locRes.json();
     
-    glacierMetadata = await response.json();
+    // Pre-fetch all geometries into RAM so the slider never lags!
+    await Promise.all(availableYears.map(async (y) => {
+      if (!geojsonCache[y]) {
+        const res = await fetch(`../data/glaciers_${y}.geojson`);
+        if (res.ok) geojsonCache[y] = await res.json();
+      }
+    }));
   } catch (error) {
-    console.error("[-] Failed to load glacier location:", error);
+    console.error("[-] Failed during boot sequence:", error);
   }
 
-  onYearChange(parseInt(yearSlider.value) || 0);
+  onYearChange(parseInt(yearSlider.value));
 }
 
 initApp();
+
+
+// ── 8. PLAYBACK LOGIC ──
+let isPlaying = false;
+let playInterval = null;
+const playBtn = document.getElementById('playBtn');
+
+function togglePlay() {
+  if (isPlaying) {
+    pause();
+  } else {
+    play();
+  }
+}
+
+function play() {
+  isPlaying = true;
+  document.getElementById('icon').setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z'); // Pause Icon
+
+  // 1. If we are already at the end, restart immediately upon clicking play
+  if (parseInt(yearSlider.value) >= 2016) {
+    yearSlider.value = 1850;
+    onYearChange(1850);
+  }
+
+  playInterval = setInterval(() => {
+    let y = parseInt(yearSlider.value);
+    
+    // 2. Loop logic: If we hit 2016, reset to 1850 instead of pausing
+    if (y >= 2016) {
+      pause();
+    } else {
+      yearSlider.value = y + 1;
+      onYearChange(y + 1);
+    }
+  }, 30); // 30ms per year for stable clicking
+}
+
+function pause() {
+  isPlaying = false;
+  document.getElementById('icon').setAttribute('d', 'M8 5v14l11-7z'); // Play Icon
+  clearInterval(playInterval);
+}
+
+playBtn.addEventListener('click', togglePlay);
+
+yearSlider.addEventListener('mousedown', pause);
+yearSlider.addEventListener('touchstart', pause);
