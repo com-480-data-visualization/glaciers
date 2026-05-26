@@ -1,3 +1,15 @@
+// Glaciers that have real velocity measurements in the GLAMOS CSV
+const VELOCITY_GLACIERS = new Set([
+  'Allalingletscher',
+  'Glacier de Corbassière',
+  'Glacier du Giétro',
+  'Grosser Aletschgletscher',
+  'Hohlaubgletscher',
+  'Rhonegletscher',
+  'Schwarzberggletscher',
+  'Silvrettagletscher'
+]);
+
 const flowData = {
   aletsch:       { dir: 210, len: 0.065 },
   gorner:        { dir: 290, len: 0.055 },
@@ -143,9 +155,24 @@ async function updateGlacierPolygons(year) {
       geojsonCache[year] = geojsonData;
     }
 
+    // In velocity mode: only show the 8 glaciers that have measurement data
+    const displayFeatures = velocityVisible
+      ? geojsonData.features.filter(f => VELOCITY_GLACIERS.has(f.properties['glacier name']))
+      : geojsonData.features;
+    const displayData = { ...geojsonData, features: displayFeatures };
+
     // Draw new sheet
-    currentGeojsonLayer = L.geoJSON(geojsonData, {
+    currentGeojsonLayer = L.geoJSON(displayData, {
       style: function (feature) {
+        if (velocityVisible) {
+          return {
+            stroke: true,
+            color: '#0d2b42',
+            weight: 1.5,
+            fillColor: '#1b4f72',
+            fillOpacity: 0.82
+          };
+        }
         const isActive = feature.properties.SGI === activeGlacierSGI;
         return {
           stroke: isActive,
@@ -221,9 +248,9 @@ async function updateGlacierPolygons(year) {
         baselineToCompare = baselineFeature ? (baselineFeature.properties.area_m2 || baselineFeature.properties.Shape_Area || 0) / 1000000 : null;
       }
     } else {
-      // Whole-map statistics
-      glacierCount = geojsonData.features.length;
-      geojsonData.features.forEach(f => totalArea += (f.properties.area_m2 || f.properties.Shape_Area || 0) / 1000000);
+      // Whole-map statistics (only visible glaciers in velocity mode)
+      glacierCount = displayFeatures.length;
+      displayFeatures.forEach(f => totalArea += (f.properties.area_m2 || f.properties.Shape_Area || 0) / 1000000);
       baselineToCompare = globalBaselineArea;
     }
 
@@ -261,7 +288,6 @@ let vectorAnimFrame = null;
 
 function clearVectorField() {
   vectorLayerGroup.clearLayers();
-  document.getElementById('vectorLegend').classList.remove('visible');
   if (vectorAnimFrame) cancelAnimationFrame(vectorAnimFrame);
 }
 
@@ -384,7 +410,7 @@ const yearSlider = document.getElementById('yearSlider');
 const yearDisplay = document.getElementById('yearDisplay');
 const ticks = document.getElementById('sliderTicks');
 
-ticks.innerHTML = ''; 
+ticks.innerHTML = '';
 availableYears.forEach((year, index) => {
   const tick = document.createElement('span');
   tick.className = 'slider-tick';
@@ -394,6 +420,20 @@ availableYears.forEach((year, index) => {
     onYearChange(index);
   });
   ticks.appendChild(tick);
+});
+
+// Velocity year ticks (1990–2025)
+const velTicks = document.getElementById('velSliderTicks');
+[1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025].forEach(year => {
+  const tick = document.createElement('span');
+  tick.className = 'slider-tick';
+  tick.textContent = year;
+  tick.addEventListener('click', () => {
+    document.getElementById('velYearSlider').value = year;
+    document.getElementById('velYearDisplay').textContent = year;
+    if (velocityVisible) renderVelocityLayer(year);
+  });
+  velTicks.appendChild(tick);
 });
 
 function onYearChange(sliderIndex) {
@@ -629,6 +669,208 @@ chartContainer.addEventListener('pointermove', (e) => {
 
 chartContainer.addEventListener('pointerup', () => isScrubbing = false);
 chartContainer.addEventListener('pointercancel', () => isScrubbing = false);
+
+
+// ── VELOCITY LAYER ──
+const VELOCITY_YEARS = [1990,1991,1992,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025];
+
+let velocityData = null;
+let velocityLayerGroup = L.layerGroup();
+let velocityVisible = false;
+
+// Swisstopo approximation: LV03 (EPSG:21781) → WGS84
+// latitude_from col = E (easting), longitude_from col = N (northing)
+function lv03ToWgs84(E, N) {
+  const y = (E - 600000) / 1e6;
+  const x = (N - 200000) / 1e6;
+  const lon = 2.6779094 + 4.728982*y + 0.791484*y*x + 0.1306*y*x*x - 0.0436*y*y*y;
+  const lat = 16.9023892 + 3.238272*x - 0.270978*y*y - 0.002528*x*x - 0.0447*y*y*x - 0.0140*x*x*x;
+  return [lat * 100/36, lon * 100/36];
+}
+
+async function loadVelocityCSV() {
+  const resp = await fetch('../data/csv/flowvelocity_2025_imputed_no_ablation.csv');
+  const text = await resp.text();
+  const lines = text.split('\n');
+
+  // First row is the header — skip it
+  const dataLines = lines.slice(1).filter(l => l.trim() !== '');
+
+  const features = [];
+  dataLines.forEach(line => {
+    const cols = line.split(',');
+    if (cols.length < 17) return;
+
+    const stake    = cols[0].trim();   // stake_name
+    const glacier  = cols[1].trim();   // glacier_name
+    const dateTo   = cols[6].trim();   // date_to
+    const E        = parseFloat(cols[8]);   // latitude_from  = easting  in LV03
+    const N        = parseFloat(cols[9]);   // longitude_from = northing in LV03
+    const altitude = parseFloat(cols[10]);
+    const dx       = parseFloat(cols[12]);  // d_x
+    const dy       = parseFloat(cols[13]);  // d_y
+    const velocity = parseFloat(cols[16]);  // velocity_xy (col 16 in cleaned file)
+
+    if (!stake || isNaN(E) || isNaN(N) || isNaN(velocity) || isNaN(dx) || isNaN(dy)) return;
+
+    const year  = parseInt(dateTo.substring(0, 4));
+    const angle = Math.atan2(dx, dy) * 180 / Math.PI;
+    const [lat, lon] = lv03ToWgs84(E, N);
+
+    features.push({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [lon, lat] },
+      properties: { stake, glacier, year, dx, dy, velocity, angle, altitude, date_from: cols[4].trim(), date_to: dateTo }
+    });
+  });
+
+  return { type: 'FeatureCollection', features };
+}
+
+function velColor(v) {
+  if (v < 2) return '#4fc3f7';
+  if (v < 4) return '#29b6f6';
+  if (v < 6) return '#ffd54f';
+  if (v < 8) return '#ff8f00';
+  return '#f44336';
+}
+
+function arrowSVG(angle, vel, color) {
+  const len = Math.min(8 + vel * 3.5, 36);
+  return `<svg viewBox="-20 -20 40 40" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+    <g transform="rotate(${angle})">
+      <line x1="0" y1="${len/2}" x2="0" y2="${-len/2}" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
+      <polygon points="0,${-len/2 - 5} -4,${-len/2 + 3} 4,${-len/2 + 3}" fill="${color}"/>
+    </g>
+  </svg>`;
+}
+
+function nearestVelocityYear(year) {
+  return VELOCITY_YEARS.reduce((a, b) => Math.abs(b - year) < Math.abs(a - year) ? b : a);
+}
+
+async function renderVelocityLayer(year) {
+  velocityLayerGroup.clearLayers();
+  const legendEl = document.getElementById('velocityLegend');
+
+  if (!velocityVisible) {
+    legendEl.classList.remove('visible');
+    return;
+  }
+
+  if (!velocityData) {
+    try {
+      velocityData = await loadVelocityCSV();
+    } catch (e) {
+      console.error('[-] Failed to load velocity CSV:', e);
+      return;
+    }
+  }
+
+  const velYear = nearestVelocityYear(year);
+  document.getElementById('velYearDisplay').textContent = velYear;
+  document.getElementById('velYearSlider').value = velYear;
+
+  const features = velocityData.features.filter(f => f.properties.year === velYear);
+  const zoom = map.getZoom();
+
+  if (zoom < 11) {
+    // Aggregate: one arrow per glacier (vector mean of dx/dy, mean velocity/position)
+    const byGlacier = {};
+    features.forEach(f => {
+      const p = f.properties;
+      const [lon, lat] = f.geometry.coordinates;
+      if (!byGlacier[p.glacier]) byGlacier[p.glacier] = { lats: [], lons: [], dxs: [], dys: [], vels: [] };
+      const g = byGlacier[p.glacier];
+      g.lats.push(lat); g.lons.push(lon);
+      g.dxs.push(p.dx); g.dys.push(p.dy);
+      g.vels.push(p.velocity);
+    });
+
+    Object.entries(byGlacier).forEach(([name, g]) => {
+      const lat = g.lats.reduce((a, b) => a + b) / g.lats.length;
+      const lon = g.lons.reduce((a, b) => a + b) / g.lons.length;
+      const meanDx = g.dxs.reduce((a, b) => a + b) / g.dxs.length;
+      const meanDy = g.dys.reduce((a, b) => a + b) / g.dys.length;
+      const meanVel = g.vels.reduce((a, b) => a + b) / g.vels.length;
+      const angle = Math.atan2(meanDx, meanDy) * 180 / Math.PI;
+      const color = velColor(meanVel);
+      const icon = L.divIcon({
+        html: arrowSVG(angle, meanVel, color),
+        className: '',
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+      });
+      const marker = L.marker([lat, lon], { icon });
+      marker.bindTooltip(
+        `<b>${name}</b><br>avg ${meanVel.toFixed(1)} m/yr · ${g.lats.length} stakes`,
+        { direction: 'top', offset: [0, -20] }
+      );
+      velocityLayerGroup.addLayer(marker);
+    });
+  } else {
+    // Individual stakes
+    features.forEach(f => {
+      const p = f.properties;
+      const [lon, lat] = f.geometry.coordinates;
+      const color = velColor(p.velocity);
+      const icon = L.divIcon({
+        html: arrowSVG(p.angle, p.velocity, color),
+        className: '',
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+      });
+      const marker = L.marker([lat, lon], { icon });
+      marker.bindTooltip(
+        `<b>${p.glacier}</b><br>${p.velocity.toFixed(1)} m/yr · ${Math.round(p.altitude)} m`,
+        { direction: 'top', offset: [0, -20] }
+      );
+      velocityLayerGroup.addLayer(marker);
+    });
+  }
+
+  if (!map.hasLayer(velocityLayerGroup)) velocityLayerGroup.addTo(map);
+  legendEl.classList.add('visible');
+}
+
+const velocityToggleBtn = document.getElementById('velocityToggle');
+const velocityPanel = document.getElementById('velocityPanel');
+const velYearSlider = document.getElementById('velYearSlider');
+
+velocityToggleBtn.addEventListener('click', () => {
+  velocityVisible = !velocityVisible;
+  velocityToggleBtn.classList.toggle('active', velocityVisible);
+  velocityToggleBtn.innerHTML = velocityVisible ? '&#8592; Classic Mode' : '&#8594; Flow Velocity';
+  velocityPanel.classList.toggle('visible', velocityVisible);
+  document.getElementById('mainSliderRow').classList.toggle('hidden', velocityVisible);
+  document.getElementById('timelineHeader').classList.toggle('hidden', velocityVisible);
+
+  const currentYear = parseInt(yearDisplay.textContent);
+
+  if (velocityVisible) {
+    updateGlacierPolygons(currentYear);
+    renderVelocityLayer(parseInt(velYearSlider.value));
+  } else {
+    velocityLayerGroup.clearLayers();
+    if (map.hasLayer(velocityLayerGroup)) map.removeLayer(velocityLayerGroup);
+    document.getElementById('velocityLegend').classList.remove('visible');
+    updateGlacierPolygons(currentYear);
+  }
+});
+
+velYearSlider.addEventListener('input', (e) => {
+  const year = nearestVelocityYear(parseInt(e.target.value));
+  document.getElementById('velYearDisplay').textContent = year;
+  if (velocityVisible) renderVelocityLayer(year);
+});
+
+// Re-render on zoom so low-zoom aggregation stays in sync
+map.on('zoomend', () => {
+  if (velocityVisible) {
+    const year = nearestVelocityYear(parseInt(document.getElementById('velYearSlider').value));
+    renderVelocityLayer(year);
+  }
+});
 
 
 // ── INIT: BOOT SEQUENCE ──

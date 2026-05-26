@@ -191,29 +191,121 @@ input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: 
   box-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
 
-/* ── VECTOR FLOW FIELD ── */
-.flow-arrow { transition: opacity 0.4s; }
-.vector-legend {
+/* ── MAIN SLIDER + TIMELINE HIDE IN VELOCITY MODE ── */
+#timelineHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: opacity 0.25s ease;
+}
+#timelineHeader.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+#mainSliderRow {
+  max-height: 80px;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  opacity: 1;
+}
+#mainSliderRow.hidden {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* ── VELOCITY TOGGLE BUTTON ── */
+.velocity-btn {
+  background: var(--earth-50);
+  border: 1.5px solid var(--earth-300);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 11px; font-weight: 600;
+  color: var(--earth-600);
+  cursor: pointer;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.velocity-btn:hover {
+  background: var(--glacier-ice);
+  border-color: var(--glacier-mid);
+  color: var(--glacier-deep);
+}
+.velocity-btn.active {
+  background: var(--glacier-deep);
+  border-color: var(--glacier-deep);
+  color: #fff;
+}
+
+/* ── VELOCITY SUB-PANEL ── */
+.velocity-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.velocity-panel.visible {
+  max-height: 160px;
+}
+.velocity-divider {
+  border-top: 1px solid var(--earth-200);
+  margin: 12px 0 14px;
+}
+.vel-year-display {
+  font-family: 'DM Serif Display', serif;
+  font-size: 24px;
+  color: var(--glacier-deep);
+  min-width: 60px;
+  text-align: center;
+}
+.velocity-note {
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--earth-400);
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+/* ── VELOCITY LEGEND ── */
+.vel-legend {
   position: fixed;
-  bottom: 120px; right: 16px;
+  top: 140px; right: 15px;
   z-index: 600;
-  background: rgba(18,18,18,0.94); /* Darkened */
+  background: rgba(255,255,255,0.96);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--earth-200);
   border-radius: var(--radius-sm);
   padding: 12px 16px;
   box-shadow: var(--shadow-md);
-  border: 1px solid var(--earth-200);
-  font-size: 11px; color: var(--earth-600);
+  font-size: 11px;
   opacity: 0; pointer-events: none;
   transition: opacity 0.3s;
+  min-width: 140px;
 }
-.vector-legend.visible { opacity: 1; pointer-events: all; }
-.vector-legend-title {
-  font-weight: 600; font-size: 11px; text-transform: uppercase;
-  letter-spacing: 1px; color: var(--earth-700); margin-bottom: 8px;
+.vel-legend.visible { opacity: 1; pointer-events: all; }
+.vel-legend-title {
+  font-weight: 700; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--earth-600);
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--earth-200);
+  padding-bottom: 6px;
 }
-.vector-legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.vector-legend-swatch { width: 28px; height: 3px; border-radius: 2px; }
+.vel-legend-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 5px; font-size: 11px; color: var(--earth-800);
+}
+.vel-legend-row:last-of-type { margin-bottom: 0; }
+.vel-legend-swatch {
+  width: 24px; height: 4px; border-radius: 2px; flex-shrink: 0;
+}
+.vel-legend-note {
+  margin-top: 8px;
+  font-size: 9px; color: var(--earth-400);
+  text-align: center; letter-spacing: 0.5px;
+  border-top: 1px solid var(--earth-200);
+  padding-top: 6px;
+}
 
 /* ── MAP MARKERS ── */
 .glacier-marker { border: none; background: none; }
