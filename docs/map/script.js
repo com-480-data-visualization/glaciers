@@ -19,27 +19,97 @@ const STORY_CHAPTERS = [
   {
     year: 1850,
     bounds: [[45.92, 6.95], [46.82, 8.45]],
-    caption: 'The story starts in the Valais and Bernese Alps, where large valley glaciers filled familiar high-Alpine landscapes.'
+    caption: '1850 overview: the story starts in the Valais and Bernese Alps, where large valley glaciers filled familiar high-Alpine landscapes.'
+  },
+  {
+    year: 1850,
+    sgi: 'B36-26',
+    caption: 'Aletsch in 1850: the largest glacier in the Alps begins the sequence with a broad Little Ice Age outline.'
+  },
+  {
+    year: 1931,
+    sgi: 'B36-26',
+    caption: 'Aletsch in 1931: retreat is visible, but the glacier still dominates the upper Rhone landscape.'
   },
   {
     year: 1973,
-    bounds: [[45.92, 6.95], [46.82, 8.45]],
-    caption: 'By the 20th century, retreat is uneven: some small glaciers lose a high share, while the giants still dominate the map by area.'
+    sgi: 'B36-26',
+    caption: 'Aletsch in 1973: the loss surface grows around the tongue while the glacier remains enormous in absolute area.'
+  },
+  {
+    year: 2010,
+    sgi: 'B36-26',
+    caption: 'Aletsch in 2010: the modern outline pulls far back from the 1850 footprint.'
+  },
+  {
+    year: 2016,
+    sgi: 'B36-26',
+    caption: 'Aletsch in 2016: the recent inventories show continued thinning and edge retreat.'
   },
   {
     year: 2023,
     sgi: 'B36-26',
-    caption: 'Aletsch remains the largest glacier in the Alps, but the visible lost-ice surface around it is now broad and continuous.'
+    caption: 'Aletsch in SGI2023: the glacier is still the largest, but the visible lost-ice surface is now broad and continuous.'
+  },
+  {
+    year: 1850,
+    sgi: 'B56-07',
+    caption: 'Gorner in 1850: the Zermatt and Monte Rosa glacier system starts as one of Switzerland’s major ice landscapes.'
+  },
+  {
+    year: 1931,
+    sgi: 'B56-07',
+    caption: 'Gorner in 1931: the outline contracts, but the system remains large by absolute area.'
+  },
+  {
+    year: 1973,
+    sgi: 'B56-07',
+    caption: 'Gorner in 1973: retreat becomes easier to read against the 1850 footprint.'
+  },
+  {
+    year: 2010,
+    sgi: 'B56-07',
+    caption: 'Gorner in 2010: the lost area around the glacier is now a major part of the story.'
+  },
+  {
+    year: 2016,
+    sgi: 'B56-07',
+    caption: 'Gorner in 2016: the glacier keeps shrinking inside a landscape familiar from Zermatt tourism.'
   },
   {
     year: 2023,
     sgi: 'B56-07',
-    caption: 'At Gorner near Zermatt and the Matterhorn, large absolute losses reshape one of Switzerland’s best-known tourism landscapes.'
+    caption: 'Gorner in SGI2023: large absolute losses reshape the ice system near the Matterhorn.'
+  },
+  {
+    year: 1850,
+    sgi: 'B43-03',
+    caption: 'Rhone in 1850: a famous glacier front extends much farther down toward the Furka Pass landscape.'
+  },
+  {
+    year: 1931,
+    sgi: 'B43-03',
+    caption: 'Rhone in 1931: the glacier has already retreated from its historic footprint.'
+  },
+  {
+    year: 1973,
+    sgi: 'B43-03',
+    caption: 'Rhone in 1973: the loss is compact compared with Aletsch, but very visible in a small roadside glacier.'
+  },
+  {
+    year: 2010,
+    sgi: 'B43-03',
+    caption: 'Rhone in 2010: the accessible glacier front is much shorter than the historic outline.'
+  },
+  {
+    year: 2016,
+    sgi: 'B43-03',
+    caption: 'Rhone in 2016: the ice grotto landscape sits beside an increasingly exposed forefield.'
   },
   {
     year: 2023,
     sgi: 'B43-03',
-    caption: 'At Rhone, a famous roadside glacier and ice grotto show how quickly an accessible glacier front can pull back.'
+    caption: 'Rhone in SGI2023: the familiar tourism glacier shows how quickly an accessible ice front can pull back.'
   }
 ];
 
@@ -280,7 +350,7 @@ function addInventoryLayer(year, opacity) {
 
 function drawLostArea(year) {
   lostAreaLayerGroup.clearLayers();
-  if (velocityVisible || isIntroAnimating) return;
+  if (velocityVisible) return;
 
   if (!geojsonCache[MIN_YEAR]) return;
   const baselineDisplayData = buildDisplayData(geojsonCache[MIN_YEAR]);
@@ -899,10 +969,10 @@ async function runStoryAnimation(onFinish) {
       const layer = feature ? L.geoJSON(feature) : null;
       targetKey = `sgi:${chapter.sgi}`;
       if (targetKey !== lastStoryTarget && layer && layer.getBounds().isValid()) {
-        map.flyToBounds(layer.getBounds(), { padding: [80, 380], duration: 1.15, maxZoom: 12 });
+        map.fitBounds(layer.getBounds(), { paddingTopLeft: [70, 70], paddingBottomRight: [420, 170], maxZoom: 12 });
       }
     } else if (targetKey !== lastStoryTarget) {
-      map.flyToBounds(chapter.bounds, { padding: [40, 40], duration: 1.15 });
+      map.fitBounds(chapter.bounds, { padding: [40, 40] });
     }
     lastStoryTarget = targetKey;
 

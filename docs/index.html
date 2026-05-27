@@ -2,57 +2,98 @@
 <html lang="en">
 
 <head>
-	<meta charset="utf-8">
-
-	<title>Swiss Glacier Retreat</title>
-
-	<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swiss Glacier Retreat</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
-
-    <header>
+<body class="welcome-page">
+  <header>
     <div class="logo-area">
-      <div class="logo-icon"></div> <div class="logo-text">
+      <div class="logo-icon"></div>
+      <div class="logo-text">
         <h1>Swiss Glacier Retreat</h1>
       </div>
     </div>
   </header>
 
-    <main class="scrolling-list">
+  <main class="welcome-shell">
+    <section class="welcome-hero">
+      <div class="welcome-kicker">GLAMOS inventory outlines · 1850 to SGI2023</div>
+      <h2>See how Swiss glaciers retreated, glacier by glacier.</h2>
+      <p>
+        This project turns historical glacier inventories into an interactive story about uneven retreat. It shows
+        where ice surface has disappeared since 1850, why large glaciers can dominate absolute losses, and why smaller
+        or more accessible glaciers can feel especially dramatic in familiar Alpine tourism landscapes.
+      </p>
+      <div class="hero-cta">
+        <a href="map/index.html" class="primary-cta">See story</a>
+      </div>
+    </section>
 
-        <div class="page-hero">
-            <h2>Swiss glaciers retreat unevenly across familiar Alpine landscapes</h2>
-        </div>
+    <section class="welcome-grid" aria-label="Project goals">
+      <article class="welcome-panel">
+        <span>01</span>
+        <h3>Make retreat visible</h3>
+        <p>
+          The map compares measured inventory outlines from 1850, 1931, 1973, 2010, 2016, and SGI2023. The orange
+          footprint makes the lost ice surface visible instead of reducing retreat to one number.
+        </p>
+      </article>
+      <article class="welcome-panel">
+        <span>02</span>
+        <h3>Compare different kinds of loss</h3>
+        <p>
+          Aletsch and Gorner show large absolute area losses. Rhone shows how a smaller, highly visited glacier can
+          transform a familiar landscape even when its total area is much lower.
+        </p>
+      </article>
+      <article class="welcome-panel">
+        <span>03</span>
+        <h3>Separate outlines from context</h3>
+        <p>
+          SGI2023 / 2021–2024 imagery is the latest outline inventory used for polygon area. 2025 GLAMOS files provide
+          velocity, mass-balance, and volume context, not new glacier outlines.
+        </p>
+      </article>
+    </section>
 
-        <div class="body-text">
-            Explore GLAMOS inventory outlines from 1850 to SGI2023 / 2021–2024 imagery. The map makes lost ice surface visible, compares large absolute losses with high relative losses, and follows Aletsch, Gorner, and Rhone through landscapes known from railways, passes, resorts, and glacier tourism.
-        </div>
-        <div class="hero-cta">
-            <a href="map/index.html" class="primary-cta">Play the glacier story</a>
-        </div>
-        
-        <article class="iframe-card">
-            <iframe src="map/index.html"></iframe>
-        </article>
+    <section class="welcome-details">
+      <div>
+        <h3>What the story follows</h3>
+        <p>
+          The guided map starts in the Valais and Bernese Alps, then steps through Aletsch, Gorner, and Rhone from the
+          oldest inventory to the latest loaded inventory. You can also leave the story and explore every SGI2023 glacier
+          directly.
+        </p>
+      </div>
+      <div>
+        <h3>What you can inspect</h3>
+        <p>
+          Drag or play the area timeline, click any glacier for an area chart, switch to measured flow velocity, and open
+          the detailed pages for the three featured glaciers.
+        </p>
+      </div>
+    </section>
 
-        <div class="box-row">
-            <a href="glaciers/aletsch.html" class="clickable-box">
-                <h4>Aletschgletscher</h4>
-                <p>Compare the Alps' largest glacier with the broad lost-ice surface around it.</p>
-            </a>
-            
-            <a href="glaciers/rhone.html" class="clickable-box">
-                <h4>Rhonegletscher</h4>
-                <p>Follow a roadside glacier where tourism, protective blankets, and retreat meet.</p>
-            </a>
-            
-            <a href="glaciers/gorner.html" class="clickable-box">
-                <h4>Gornergletscher</h4>
-                <p>See how a large glacier system near Zermatt and the Matterhorn loses area.</p>
-            </a>
-        </div>
+    <div class="box-row">
+      <a href="glaciers/aletsch.html" class="clickable-box">
+        <h4>Aletschgletscher</h4>
+        <p>Compare the Alps' largest glacier with the broad lost-ice surface around it.</p>
+      </a>
 
-    </main>
+      <a href="glaciers/rhone.html" class="clickable-box">
+        <h4>Rhonegletscher</h4>
+        <p>Follow a roadside glacier where tourism, protective blankets, and retreat meet.</p>
+      </a>
+
+      <a href="glaciers/gorner.html" class="clickable-box">
+        <h4>Gornergletscher</h4>
+        <p>See how a large glacier system near Zermatt and the Matterhorn loses area.</p>
+      </a>
+    </div>
+  </main>
 </body>
+
 </html>
