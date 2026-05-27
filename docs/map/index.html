@@ -87,9 +87,10 @@
       </div>
     </div>
     <div id="mainSliderRow" class="slider-track-container">
+      <button class="timeline-play-btn" id="timelinePlay" type="button">Play timeline</button>
       <input type="range" id="yearSlider" min="1850" max="2016" value="1850" step="1" />
       <div class="slider-ticks" id="sliderTicks"></div>
-      <div class="slider-note">Measured inventory years: 1850, 1931, 1973, 2010, 2016. Intermediate years are interpolated visually.</div>
+      <div class="slider-note" id="inventorySliderNote">Loading measured inventory years...</div>
     </div>
 
     <div class="velocity-panel" id="velocityPanel">
@@ -97,12 +98,21 @@
       <div class="slider-header" style="margin-bottom:8px">
         <div class="slider-label">Velocity Year</div>
         <div class="vel-year-display" id="velYearDisplay">2024</div>
+        <button class="timeline-play-btn compact" id="velocityPlay" type="button">Play velocity</button>
       </div>
       <div class="slider-track-container">
         <input type="range" id="velYearSlider" min="1990" max="2025" value="2024" step="1" />
         <div class="slider-ticks" id="velSliderTicks"></div>
       </div>
-      <div class="velocity-note">Measured surface ice-flow velocity from GLAMOS stakes. Glacier outlines are fixed to the 2016 inventory.</div>
+      <div class="velocity-note">Measured surface ice-flow velocity from GLAMOS stakes. Glacier outlines use the latest loaded inventory.</div>
+    </div>
+  </div>
+
+  <div class="story-caption" id="storyCaption" aria-live="polite">
+    <div id="storyCaptionText"></div>
+    <div class="story-caption-controls" id="storyCaptionControls">
+      <span id="storyTimer">Auto-skip in 10s</span>
+      <button id="storyNext" type="button">Next</button>
     </div>
   </div>
 
@@ -136,7 +146,7 @@
     <div class="intro-panel">
       <div class="intro-kicker">Swiss glacier retreat</div>
       <h1>Swiss glaciers are not just shrinking — they are shrinking unevenly.</h1>
-      <p>Play the 1850–2016 inventory sequence to see retreat unfold across the Alps, then continue into Aletsch, Gorner, and Rhône for detailed stories.</p>
+      <p>Play the 1850–2023 inventory sequence through the Valais and Bernese Alps, then zoom into Aletsch, Gorner, and Rhône to compare visible lost ice, large absolute losses, and familiar tourism landscapes.</p>
       <div class="intro-actions">
         <button id="introPlay">Play story</button>
         <button id="introSkip" class="secondary">Skip</button>

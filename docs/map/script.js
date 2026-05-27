@@ -1,13 +1,47 @@
-const INVENTORY_YEARS = [1850, 1931, 1973, 2010, 2016];
 const MIN_YEAR = 1850;
-const MAX_YEAR = 2016;
-const LATEST_INVENTORY_YEAR = 2016;
+const BASE_INVENTORY_YEARS = [1850, 1931, 1973, 2010, 2016];
+const FULL_INVENTORY_YEARS = [1850, 1931, 1973, 2010, 2016, 2023];
+const STORY_CHAPTER_DELAY_MS = 10000;
+const AREA_TIMELINE_STEP_MS = 140;
+const VELOCITY_TIMELINE_STEP_MS = 700;
+let INVENTORY_YEARS = [...BASE_INVENTORY_YEARS];
+let MAX_YEAR = 2016;
+let LATEST_INVENTORY_YEAR = 2016;
+let latestInventoryLabel = '2016 inventory';
 
 const STORY_GLACIERS = {
   'B36-26': { name: 'Aletsch', url: '../glaciers/aletsch.html' },
   'B56-07': { name: 'Gorner', url: '../glaciers/gorner.html' },
   'B43-03': { name: 'Rhone', url: '../glaciers/rhone.html' }
 };
+
+const STORY_CHAPTERS = [
+  {
+    year: 1850,
+    bounds: [[45.92, 6.95], [46.82, 8.45]],
+    caption: 'The story starts in the Valais and Bernese Alps, where large valley glaciers filled familiar high-Alpine landscapes.'
+  },
+  {
+    year: 1973,
+    bounds: [[45.92, 6.95], [46.82, 8.45]],
+    caption: 'By the 20th century, retreat is uneven: some small glaciers lose a high share, while the giants still dominate the map by area.'
+  },
+  {
+    year: 2023,
+    sgi: 'B36-26',
+    caption: 'Aletsch remains the largest glacier in the Alps, but the visible lost-ice surface around it is now broad and continuous.'
+  },
+  {
+    year: 2023,
+    sgi: 'B56-07',
+    caption: 'At Gorner near Zermatt and the Matterhorn, large absolute losses reshape one of Switzerland’s best-known tourism landscapes.'
+  },
+  {
+    year: 2023,
+    sgi: 'B43-03',
+    caption: 'At Rhone, a famous roadside glacier and ice grotto show how quickly an accessible glacier front can pull back.'
+  }
+];
 
 const VELOCITY_GLACIER_NAMES = new Set([
   'Allalingletscher',
@@ -54,10 +88,16 @@ const chartContainer = document.getElementById('popupChartContainer');
 const velocityToggleBtn = document.getElementById('velocityToggle');
 const velocityPanel = document.getElementById('velocityPanel');
 const velYearSlider = document.getElementById('velYearSlider');
+const timelinePlayBtn = document.getElementById('timelinePlay');
+const velocityPlayBtn = document.getElementById('velocityPlay');
 const replayStoryBtn = document.getElementById('replayStory');
 const mapLegend = document.getElementById('mapLegend');
 const mapLoading = document.getElementById('mapLoading');
 const loadingText = document.getElementById('loadingText');
+const storyCaptionText = document.getElementById('storyCaptionText');
+const storyCaptionControls = document.getElementById('storyCaptionControls');
+const storyTimer = document.getElementById('storyTimer');
+const storyNext = document.getElementById('storyNext');
 
 let glacierMetadata = {};
 let geojsonCache = {};
@@ -73,6 +113,12 @@ let velocityVisible = false;
 let velocityData = null;
 let introPlayed = false;
 let isIntroAnimating = false;
+let storyRunToken = 0;
+let storyAdvanceResolver = null;
+let storyTimerInterval = null;
+let storyTimerTimeout = null;
+let areaTimelineTimer = null;
+let velocityTimelineTimer = null;
 let renderRequestId = 0;
 let scheduledRender = null;
 let fitInitialBounds = true;
@@ -92,7 +138,9 @@ baseTileLayer.on('load', () => setLoading('tiles', false));
 baseTileLayer.addTo(map);
 
 function getFeatureAreaKm2(feature) {
-  return (feature?.properties?.area_m2 || feature?.properties?.Shape_Area || 0) / 1000000;
+  if (!feature) return 0;
+  if (Number.isFinite(feature.properties?.area_km2)) return feature.properties.area_km2;
+  return (feature.properties?.area_m2 || feature.properties?.Shape_Area || 0) / 1000000;
 }
 
 function findFeatureBySGI(geojson, sgi) {
@@ -274,9 +322,10 @@ function drawStoryHighlights() {
 
     const center = outline.getBounds().getCenter();
     const label = L.marker(center, {
+      interactive: false,
       icon: L.divIcon({
         className: 'story-label',
-        html: `<a href="${story.url}">${story.name}</a>`,
+        html: `<span>${story.name}</span>`,
         iconSize: [96, 28],
         iconAnchor: [48, 14]
       })
@@ -292,7 +341,7 @@ function updateStats(year) {
 
   if (velocityVisible) {
     countEl.textContent = VELOCITY_GLACIER_NAMES.size;
-    areaEl.textContent = '2016 outlines';
+    areaEl.textContent = latestInventoryLabel;
     changeEl.textContent = 'velocity only';
     changeEl.style.color = 'var(--earth-500)';
     return;
@@ -373,6 +422,18 @@ function drawSliderTicks() {
   });
 }
 
+function updateInventoryUI() {
+  yearSlider.min = MIN_YEAR;
+  yearSlider.max = MAX_YEAR;
+  yearSlider.value = Math.min(Number(yearSlider.value), MAX_YEAR);
+  yearDisplay.textContent = yearSlider.value;
+  const sliderNote = document.getElementById('inventorySliderNote');
+  if (sliderNote) {
+    sliderNote.textContent = `Measured inventory years: ${INVENTORY_YEARS.join(', ')}. Intermediate years are interpolated visually. Latest inventory: ${latestInventoryLabel}.`;
+  }
+  drawSliderTicks();
+}
+
 const velTicks = document.getElementById('velSliderTicks');
 [1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025].forEach(year => {
   const tick = document.createElement('span');
@@ -386,7 +447,10 @@ const velTicks = document.getElementById('velSliderTicks');
   velTicks.appendChild(tick);
 });
 
-yearSlider.addEventListener('input', e => scheduleGlacierUpdate(Number(e.target.value)));
+yearSlider.addEventListener('input', e => {
+  stopAreaTimelinePlayback();
+  scheduleGlacierUpdate(Number(e.target.value));
+});
 
 async function drawGlacierChart(sgi, currentYear) {
   chartContainer.innerHTML = '<div class="popup-note">Loading inventory areas...</div>';
@@ -525,20 +589,25 @@ function lv03ToWgs84(E, N) {
 async function loadVelocityCSV() {
   setLoading('velocity-csv', true, 'Loading flow velocity data');
   try {
-    const resp = await fetch('../data/csv/flowvelocity_2025_imputed_no_ablation.csv');
+    const resp = await fetch('../data/csv/flowvelocity_2025_r2025.csv');
     const text = await resp.text();
-    const features = text.split('\n').slice(1).filter(line => line.trim()).map(line => {
+    const lines = text.split('\n').filter(line => line.trim());
+    const headerIndex = lines.findIndex(line => line.toLowerCase().startsWith('stake name,glacier_name'));
+    if (headerIndex === -1) throw new Error('Flow velocity CSV header not found');
+    const header = lines[headerIndex].split(',').map(col => col.trim());
+    const col = name => header.indexOf(name);
+    const features = lines.slice(headerIndex + 1).filter(line => line.trim()).map(line => {
       const cols = line.split(',');
-      const stake = cols[0]?.trim();
-      const glacier = cols[1]?.trim();
-      const sgi = cols[2]?.trim();
-      const dateTo = cols[6]?.trim();
-      const E = parseFloat(cols[8]);
-      const N = parseFloat(cols[9]);
-      const altitude = parseFloat(cols[10]);
-      const dx = parseFloat(cols[12]);
-      const dy = parseFloat(cols[13]);
-      const velocity = parseFloat(cols[16]);
+      const stake = cols[col('stake name')]?.trim();
+      const glacier = cols[col('glacier_name')]?.trim();
+      const sgi = cols[col('SGI-ID')]?.trim();
+      const dateTo = cols[col('date_to')]?.trim();
+      const E = parseFloat(cols[col('latitude_from')]);
+      const N = parseFloat(cols[col('longitude_from')]);
+      const altitude = parseFloat(cols[col('altitude_from')]);
+      const dx = parseFloat(cols[col('d_x')]);
+      const dy = parseFloat(cols[col('d_y')]);
+      const velocity = parseFloat(cols[col('velocity_xy')]);
       if (!stake || !dateTo || isNaN(E) || isNaN(N) || isNaN(velocity) || isNaN(dx) || isNaN(dy)) return null;
       const [lat, lon] = lv03ToWgs84(E, N);
       return {
@@ -554,7 +623,7 @@ async function loadVelocityCSV() {
           velocity,
           angle: Math.atan2(dx, dy) * 180 / Math.PI,
           altitude,
-          date_from: cols[4]?.trim(),
+          date_from: cols[col('date_from')]?.trim(),
           date_to: dateTo
         }
       };
@@ -649,6 +718,7 @@ function addVelocityMarker(latLng, angle, velocity, tooltip) {
 }
 
 velocityToggleBtn.addEventListener('click', async () => {
+  stopTimelinePlayback();
   velocityVisible = !velocityVisible;
   velocityToggleBtn.classList.toggle('active', velocityVisible);
   velocityToggleBtn.textContent = velocityVisible ? 'Area Timeline' : 'Flow Velocity';
@@ -656,7 +726,7 @@ velocityToggleBtn.addEventListener('click', async () => {
   document.getElementById('mainSliderRow').classList.toggle('hidden', velocityVisible);
   document.getElementById('timelineHeader').classList.toggle('hidden', velocityVisible);
   mapLegend.classList.toggle('hidden', velocityVisible);
-  document.getElementById('outlineYearLabel').textContent = velocityVisible ? 'Outline year: 2016 inventory' : '';
+  document.getElementById('outlineYearLabel').textContent = velocityVisible ? `Outline year: ${latestInventoryLabel}` : '';
 
   if (velocityVisible) {
     await updateGlacierPolygons(LATEST_INVENTORY_YEAR);
@@ -670,6 +740,7 @@ velocityToggleBtn.addEventListener('click', async () => {
 });
 
 velYearSlider.addEventListener('input', e => {
+  stopVelocityTimelinePlayback();
   const year = nearestVelocityYear(Number(e.target.value));
   document.getElementById('velYearDisplay').textContent = year;
   if (velocityVisible) renderVelocityLayer(year);
@@ -679,30 +750,174 @@ map.on('zoomend', () => {
   if (velocityVisible) renderVelocityLayer(Number(velYearSlider.value));
 });
 
-function runStoryAnimation(onFinish) {
+function stopAreaTimelinePlayback() {
+  if (areaTimelineTimer) clearInterval(areaTimelineTimer);
+  areaTimelineTimer = null;
+  timelinePlayBtn.classList.remove('active');
+  timelinePlayBtn.textContent = 'Play timeline';
+}
+
+function stopVelocityTimelinePlayback() {
+  if (velocityTimelineTimer) clearInterval(velocityTimelineTimer);
+  velocityTimelineTimer = null;
+  velocityPlayBtn.classList.remove('active');
+  velocityPlayBtn.textContent = 'Play velocity';
+}
+
+function stopTimelinePlayback() {
+  stopAreaTimelinePlayback();
+  stopVelocityTimelinePlayback();
+}
+
+function centerLatestInventoryFeatureByName(name) {
+  const feature = geojsonCache[LATEST_INVENTORY_YEAR]?.features?.find(f => f.properties['glacier name'] === name);
+  if (!feature) return;
+  const layer = L.geoJSON(feature);
+  if (layer.getBounds().isValid()) {
+    map.panTo(layer.getBounds().getCenter(), { animate: true, duration: 0.8 });
+  }
+}
+
+function toggleAreaTimelinePlayback() {
+  if (areaTimelineTimer) {
+    stopAreaTimelinePlayback();
+    return;
+  }
+  if (isIntroAnimating) cancelStory();
+  stopVelocityTimelinePlayback();
+  timelinePlayBtn.classList.add('active');
+  timelinePlayBtn.textContent = 'Pause timeline';
+  if (Number(yearSlider.value) >= MAX_YEAR) yearSlider.value = MIN_YEAR;
+  areaTimelineTimer = setInterval(() => {
+    const nextYear = Math.min(MAX_YEAR, Number(yearSlider.value) + 1);
+    yearSlider.value = nextYear;
+    scheduleGlacierUpdate(nextYear);
+    if (nextYear >= MAX_YEAR) stopAreaTimelinePlayback();
+  }, AREA_TIMELINE_STEP_MS);
+}
+
+async function toggleVelocityTimelinePlayback() {
+  if (velocityTimelineTimer) {
+    stopVelocityTimelinePlayback();
+    return;
+  }
+  if (isIntroAnimating) cancelStory();
+  stopAreaTimelinePlayback();
+  if (!velocityVisible) velocityToggleBtn.click();
+  await ensureInventoryYear(LATEST_INVENTORY_YEAR);
+  centerLatestInventoryFeatureByName('Allalingletscher');
+  velocityPlayBtn.classList.add('active');
+  velocityPlayBtn.textContent = 'Pause velocity';
+  let index = VELOCITY_YEARS.indexOf(nearestVelocityYear(Number(velYearSlider.value)));
+  if (index >= VELOCITY_YEARS.length - 1) index = 0;
+  velocityTimelineTimer = setInterval(() => {
+    const year = VELOCITY_YEARS[index];
+    velYearSlider.value = year;
+    document.getElementById('velYearDisplay').textContent = year;
+    renderVelocityLayer(year);
+    index += 1;
+    if (index >= VELOCITY_YEARS.length) stopVelocityTimelinePlayback();
+  }, VELOCITY_TIMELINE_STEP_MS);
+}
+
+timelinePlayBtn.addEventListener('click', toggleAreaTimelinePlayback);
+velocityPlayBtn.addEventListener('click', toggleVelocityTimelinePlayback);
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function clearStoryTimer(resolvePending = false) {
+  if (resolvePending && storyAdvanceResolver) storyAdvanceResolver();
+  if (storyTimerInterval) clearInterval(storyTimerInterval);
+  if (storyTimerTimeout) clearTimeout(storyTimerTimeout);
+  storyTimerInterval = null;
+  storyTimerTimeout = null;
+  storyAdvanceResolver = null;
+}
+
+function setStoryCaption(text, showControls = false) {
+  const caption = document.getElementById('storyCaption');
+  if (!caption) return;
+  storyCaptionText.textContent = text || '';
+  caption.classList.toggle('visible', Boolean(text));
+  storyCaptionControls.classList.toggle('visible', showControls);
+}
+
+function waitForStoryAdvance(token) {
+  clearStoryTimer();
+  storyNext.disabled = false;
+  let remaining = Math.ceil(STORY_CHAPTER_DELAY_MS / 1000);
+  storyTimer.textContent = `Auto-skip in ${remaining}s`;
+  return new Promise(resolve => {
+    storyAdvanceResolver = resolve;
+    storyTimerInterval = setInterval(() => {
+      remaining -= 1;
+      storyTimer.textContent = remaining > 0 ? `Auto-skip in ${remaining}s` : 'Moving now';
+    }, 1000);
+    storyTimerTimeout = setTimeout(resolve, STORY_CHAPTER_DELAY_MS);
+  }).then(() => {
+    if (token === storyRunToken) clearStoryTimer();
+  });
+}
+
+storyNext.addEventListener('click', () => {
+  if (storyAdvanceResolver) storyAdvanceResolver();
+});
+
+function cancelStory() {
+  storyRunToken += 1;
+  isIntroAnimating = false;
+  activeGlacierSGI = null;
+  clearStoryTimer(true);
+  setStoryCaption('');
+  replayStoryBtn.textContent = 'Play story';
+  drawStoryHighlights();
+  scheduleGlacierUpdate(selectedYear);
+}
+
+async function runStoryAnimation(onFinish) {
+  const token = ++storyRunToken;
+  stopTimelinePlayback();
   if (velocityVisible) velocityToggleBtn.click();
   activeGlacierSGI = null;
+  popup.classList.remove('open');
   isIntroAnimating = true;
   fitInitialBounds = false;
-  const start = performance.now();
-  const duration = 9000;
-  function step(now) {
-    const t = Math.min(1, (now - start) / duration);
-    const year = Math.round(MIN_YEAR + t * (MAX_YEAR - MIN_YEAR));
+  replayStoryBtn.textContent = 'Cancel story';
+  let lastStoryTarget = null;
+
+  for (const chapter of STORY_CHAPTERS) {
+    if (token !== storyRunToken) return;
+    const year = Math.min(chapter.year, MAX_YEAR);
     yearSlider.value = year;
-    scheduleGlacierUpdate(year);
-    if (t < 1) {
-      requestAnimationFrame(step);
-    } else {
-      isIntroAnimating = false;
-      yearSlider.value = MAX_YEAR;
-      updateGlacierPolygons(MAX_YEAR).then(() => {
-        drawStoryHighlights();
-        if (onFinish) onFinish();
-      });
+    activeGlacierSGI = chapter.sgi || null;
+    setStoryCaption(chapter.caption, true);
+    let targetKey = `bounds:${JSON.stringify(chapter.bounds || [])}`;
+    if (chapter.sgi) {
+      const feature = findFeatureBySGI(geojsonCache[LATEST_INVENTORY_YEAR], chapter.sgi);
+      const layer = feature ? L.geoJSON(feature) : null;
+      targetKey = `sgi:${chapter.sgi}`;
+      if (targetKey !== lastStoryTarget && layer && layer.getBounds().isValid()) {
+        map.flyToBounds(layer.getBounds(), { padding: [80, 380], duration: 1.15, maxZoom: 12 });
+      }
+    } else if (targetKey !== lastStoryTarget) {
+      map.flyToBounds(chapter.bounds, { padding: [40, 40], duration: 1.15 });
     }
+    lastStoryTarget = targetKey;
+
+    await updateGlacierPolygons(year);
+    if (token !== storyRunToken) return;
+
+    await waitForStoryAdvance(token);
   }
-  requestAnimationFrame(step);
+
+  if (token !== storyRunToken) return;
+  isIntroAnimating = false;
+  replayStoryBtn.textContent = 'Play story';
+  setStoryCaption('Open any highlighted glacier for its detailed story, or drag the timeline to compare the full inventory sequence.');
+  drawStoryHighlights();
+  if (onFinish) onFinish();
 }
 
 function setupIntro() {
@@ -710,23 +925,37 @@ function setupIntro() {
   const play = document.getElementById('introPlay');
   const skip = document.getElementById('introSkip');
 
-  function finishIntro() {
+  function hideIntro() {
     overlay.classList.add('hidden');
     introPlayed = true;
+  }
+
+  function finishIntro() {
+    cancelStory();
+    hideIntro();
     drawStoryHighlights();
   }
 
   play.addEventListener('click', () => {
-    overlay.classList.add('hidden');
-    runStoryAnimation(finishIntro);
+    hideIntro();
+    runStoryAnimation(() => {
+      introPlayed = true;
+    });
   });
 
   skip.addEventListener('click', finishIntro);
-  replayStoryBtn.addEventListener('click', () => runStoryAnimation());
+  replayStoryBtn.addEventListener('click', () => {
+    if (isIntroAnimating) {
+      cancelStory();
+      return;
+    }
+    runStoryAnimation();
+  });
 }
 
 async function initApp() {
-  drawSliderTicks();
+  replayStoryBtn.disabled = true;
+  document.getElementById('introPlay').disabled = true;
   try {
     const locationResponse = await fetch('../data/glaciers_location.json');
     if (locationResponse.ok) glacierMetadata = await locationResponse.json();
@@ -735,12 +964,30 @@ async function initApp() {
   }
 
   await ensureInventoryYear(MIN_YEAR);
+  try {
+    await ensureInventoryYear(2023);
+    INVENTORY_YEARS = [...FULL_INVENTORY_YEARS];
+    MAX_YEAR = 2023;
+    LATEST_INVENTORY_YEAR = 2023;
+    latestInventoryLabel = 'SGI2023 / 2021–2024 imagery';
+  } catch (error) {
+    console.warn('SGI2023 inventory unavailable; falling back to 2016.', error);
+    INVENTORY_YEARS = [...BASE_INVENTORY_YEARS];
+    MAX_YEAR = 2016;
+    LATEST_INVENTORY_YEAR = 2016;
+    latestInventoryLabel = '2016 inventory';
+  }
+
+  updateInventoryUI();
+  await Promise.all(INVENTORY_YEARS.map(year => ensureInventoryYear(year)));
 
   geojsonCache[MIN_YEAR].features.forEach(feature => {
     baselineAreaBySGI[feature.properties.SGI] = getFeatureAreaKm2(feature);
   });
 
   setupIntro();
+  replayStoryBtn.disabled = false;
+  document.getElementById('introPlay').disabled = false;
   await updateGlacierPolygons(MIN_YEAR);
 }
 

@@ -229,6 +229,30 @@ input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: 
   color: var(--earth-500);
   text-align: center;
 }
+.timeline-play-btn {
+  align-self: flex-start;
+  border: 1px solid var(--earth-300);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--earth-900);
+  padding: 8px 11px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.timeline-play-btn:hover {
+  border-color: var(--glacier-deep);
+}
+.timeline-play-btn.active {
+  background: var(--glacier-deep);
+  border-color: var(--glacier-deep);
+  color: #fff;
+}
+.timeline-play-btn.compact {
+  margin: 0 0 0 auto;
+  padding: 7px 10px;
+}
 .slider-actions {
   display: flex;
   align-items: center;
@@ -648,7 +672,10 @@ input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: 
   background: transparent;
   border: none;
 }
-.story-label a {
+.story-label {
+  pointer-events: none;
+}
+.story-label span {
   display: block;
   padding: 5px 9px;
   border-radius: 8px;
@@ -678,6 +705,56 @@ input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: 
   padding: 24px;
   background: rgba(10, 24, 35, 0.54);
   backdrop-filter: blur(5px);
+}
+
+.story-caption {
+  position: fixed;
+  left: 50%;
+  bottom: 132px;
+  z-index: 1500;
+  width: min(720px, calc(100vw - 32px));
+  transform: translateX(-50%) translateY(10px);
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--earth-900);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--earth-200);
+  font-size: 14px;
+  line-height: 1.45;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.story-caption.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+.story-caption-controls {
+  display: none;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+.story-caption-controls.visible {
+  display: flex;
+}
+.story-caption-controls span {
+  color: var(--earth-600);
+  font-size: 12px;
+  font-weight: 700;
+}
+.story-caption-controls button {
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--glacier-deep);
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
 }
 .intro-overlay.hidden {
   display: none;

@@ -87,12 +87,17 @@ Do not open `docs/index.html` directly as a local file if you want all data load
 │       ├── glaciers_1973.geojson
 │       ├── glaciers_2010.geojson
 │       ├── glaciers_2016.geojson
+│       ├── glaciers_2023.geojson
 │       ├── glaciers_location.json
+│       ├── context/
+│       │   ├── massbalance_swisswide_2025_r2025.csv
+│       │   ├── volumechange_2025_r2025_series.csv
+│       │   └── volumechange_2025_r2025_allcombinations.csv
 │       └── csv/
 │           ├── length_change_*.csv
 │           ├── length_change_cumulative_*.csv
 │           ├── flow_velocity_clean.csv
-│           └── flowvelocity_2025_imputed_no_ablation.csv
+│           └── flowvelocity_2025_r2025.csv
 ├── scripts/
 │   └── convert.py                 # Shapefile-to-GeoJSON preprocessing
 └── data_exploration/
@@ -105,7 +110,7 @@ Do not open `docs/index.html` directly as a local file if you want all data load
 
 The project uses public glacier monitoring data and map tiles:
 
-- **GLAMOS Swiss Glacier Inventories**: historical glacier outlines for selected inventory years.
+- **GLAMOS Swiss Glacier Inventories**: historical glacier outlines for selected inventory years, ending with SGI2023 / 2021–2024 imagery when available.
 - **GLAMOS glacier length-change measurements**: used for glacier-specific cumulative and periodic retreat charts.
 - **GLAMOS Swiss Glacier Flow Velocity, release 2025**: used for the velocity-arrow layer. The raw CSV included in the repository cites: `doi:10.18750/flowvelocity.2025.r2025`.
 - **Swisstopo / geo.admin.ch map tiles**: used as the geographic basemap for the main map.
@@ -124,6 +129,7 @@ The main map loads one GeoJSON file per inventory year:
 | 1973 | `docs/data/glaciers_1973.geojson` | Historical outline inventory |
 | 2010 | `docs/data/glaciers_2010.geojson` | Modern outline inventory |
 | 2016 | `docs/data/glaciers_2016.geojson` | Modern outline inventory |
+| 2023 | `docs/data/glaciers_2023.geojson` | SGI2023 / 2021–2024 imagery |
 
 The current map uses a named, matched subset of glacier polygons. It should not be interpreted as every raw polygon from the original GLAMOS inventories. This makes temporal comparison clearer, but it excludes glaciers that are unnamed, unmatched, newly split/merged, or otherwise difficult to compare across inventories.
 
@@ -145,7 +151,7 @@ These files are rendered with D3.js in `docs/glaciers/glacier-charts.js`.
 The integrated flow-velocity layer loads:
 
 ```text
-docs/data/csv/flowvelocity_2025_imputed_no_ablation.csv
+docs/data/csv/flowvelocity_2025_r2025.csv
 ```
 
 It contains measured stake positions, measurement periods, horizontal displacement, and velocity. The map converts Swiss projected coordinates to WGS84 in the browser, then renders arrows whose direction and length/color encode measured flow.
@@ -194,7 +200,8 @@ No build step is required.
 ## Known limitations
 
 - The outline map uses a matched subset of named glaciers, not the full raw inventory.
-- Area outlines are available only for selected inventory years: 1850, 1931, 1973, 2010, and 2016.
+- Area outlines are available only for selected inventory years: 1850, 1931, 1973, 2010, 2016, and SGI2023 / 2021–2024 imagery when `docs/data/glaciers_2023.geojson` loads.
+- 2025 CSV files are used only as mass-balance, volume, and velocity context; they are not area-outline geometry.
 - Length-change and area are different metrics and should not be treated as interchangeable.
 - Velocity data is available only for selected glaciers and years.
 - The velocity layer uses an in-browser coordinate conversion from Swiss projected coordinates to WGS84.
