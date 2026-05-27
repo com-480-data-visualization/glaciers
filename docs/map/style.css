@@ -812,3 +812,67 @@ input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; transform: 
   background: transparent;
   border: none;
 }
+
+/* ── PROJECTION STYLING ── */
+.timeline-year-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.proj-badge {
+  display: inline-block;
+  background: var(--accent-warm);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  line-height: 1;
+  vertical-align: middle;
+}
+.slider-year.projected {
+  color: var(--accent-warm);
+}
+.proj-tick {
+  color: var(--accent-warm) !important;
+  font-weight: 700 !important;
+}
+
+/* Projection zone overlay on the slider */
+.projection-zone {
+  position: absolute;
+  top: 0;
+  height: 6px;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0,
+    transparent 3px,
+    rgba(211, 84, 0, 0.18) 3px,
+    rgba(211, 84, 0, 0.18) 6px
+  );
+  border-left: 2px dashed var(--accent-warm);
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 0 3px 3px 0;
+}
+.projection-label {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--accent-warm);
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+/* Chart projected line (dashed) */
+.chart-proj-line {
+  stroke-dasharray: 6, 4;
+  opacity: 0.65;
+}

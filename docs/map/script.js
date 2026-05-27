@@ -1,4 +1,5 @@
 const MIN_YEAR = 1850;
+const PROJECTION_END = 2050;
 const BASE_INVENTORY_YEARS = [1850, 1931, 1973, 2010, 2016];
 const FULL_INVENTORY_YEARS = [1850, 1931, 1973, 2010, 2016, 2023];
 const STORY_CHAPTER_DELAY_MS = 10000;
@@ -8,6 +9,7 @@ let INVENTORY_YEARS = [...BASE_INVENTORY_YEARS];
 let MAX_YEAR = 2016;
 let LATEST_INVENTORY_YEAR = 2016;
 let latestInventoryLabel = '2016 inventory';
+const isProjected = (year) => year > LATEST_INVENTORY_YEAR;
 
 const STORY_GLACIERS = {
   'B36-26': { name: 'Aletsch', url: '../glaciers/aletsch.html' },
@@ -175,6 +177,12 @@ let loadingTokens = new Set();
 let baselineAreaBySGI = {};
 let activeGlacierSGI = null;
 let selectedYear = MIN_YEAR;
+
+// ── Projection model state ──
+let tempAnomaly = {};          // year → degC anomaly (1850-2050)
+let glamosMass = {};           // { glaciers, meanByYear }
+let cumWeight = null;          // cumulative melt weight per year
+const lossPerWeightCache = {}; // SGI → loss-per-weight for projection
 let lostAreaLayerGroup = L.layerGroup().addTo(map);
 let glacierLayerGroup = L.layerGroup().addTo(map);
 let storyLayerGroup = L.layerGroup().addTo(map);
@@ -224,6 +232,10 @@ function isComparableGlacier(feature) {
 
 function getInventoryBracket(year) {
   const y = Math.max(MIN_YEAR, Math.min(MAX_YEAR, Number(year)));
+  // For projected years, always use the latest measured inventory
+  if (y > LATEST_INVENTORY_YEAR) {
+    return { previousYear: LATEST_INVENTORY_YEAR, nextYear: LATEST_INVENTORY_YEAR, t: 0 };
+  }
   for (let i = 0; i < INVENTORY_YEARS.length - 1; i++) {
     const previousYear = INVENTORY_YEARS[i];
     const nextYear = INVENTORY_YEARS[i + 1];
@@ -232,7 +244,7 @@ function getInventoryBracket(year) {
       return { previousYear, nextYear, t: (y - previousYear) / (nextYear - previousYear) };
     }
   }
-  return { previousYear: MAX_YEAR, nextYear: MAX_YEAR, t: 0 };
+  return { previousYear: LATEST_INVENTORY_YEAR, nextYear: LATEST_INVENTORY_YEAR, t: 0 };
 }
 
 async function ensureInventoryYear(year) {
@@ -271,7 +283,7 @@ function getInterpolatedArea(sgi, year) {
 function getRelativeLossPct(sgi, year) {
   const baseline = baselineAreaBySGI[sgi];
   if (!baseline) return 0;
-  return Math.max(0, ((baseline - getInterpolatedArea(sgi, year)) / baseline) * 100);
+  return Math.max(0, ((baseline - getAreaForYear(sgi, year)) / baseline) * 100);
 }
 
 function getLossColor(lossPct) {
@@ -283,20 +295,70 @@ function getLossColor(lossPct) {
   return '#7f1d1d';
 }
 
+// ── Projection model ──
+// Per-year melt weight: warmer years lose more ice. Real mean annual mass
+// balance where available (good coverage 1960+); modeled temperature as fallback.
+function meltWeight(y) {
+  const mb = glamosMass.meanByYear ? glamosMass.meanByYear[y] : undefined;
+  if (mb !== undefined && mb !== null) return Math.max(0.05, (-mb / 1000) + 1.0);
+  return Math.max(0.1, (tempAnomaly[y] ?? 0) + 1.0);
+}
+
+function buildCumWeight() {
+  cumWeight = {};
+  let s = 0;
+  for (let y = MIN_YEAR; y <= PROJECTION_END; y++) { s += meltWeight(y); cumWeight[y] = s; }
+}
+
+// Project area beyond the last measured inventory using the modern loss rate.
+// Uses 1973→latest loss-per-weight to extrapolate, accelerated by future
+// temperature melt weights. Clearly a forecast, not measured data.
+function getProjectedArea(sgi, year) {
+  const latestArea = getInterpolatedArea(sgi, LATEST_INVENTORY_YEAR);
+  if (!cumWeight || !latestArea) return latestArea || 0;
+
+  let lpw = lossPerWeightCache[sgi];
+  if (lpw === undefined) {
+    // Find a reference anchor ≥ 1973
+    let refYear = LATEST_INVENTORY_YEAR;
+    for (const iy of INVENTORY_YEARS) {
+      if (iy >= 1973 && iy < LATEST_INVENTORY_YEAR) { refYear = iy; break; }
+    }
+    if (refYear === LATEST_INVENTORY_YEAR) refYear = INVENTORY_YEARS[0]; // fallback to 1850
+    const refArea = getInterpolatedArea(sgi, refYear);
+    const denom = cumWeight[LATEST_INVENTORY_YEAR] - cumWeight[refYear];
+    lpw = (denom > 0 && refArea > latestArea) ? (refArea - latestArea) / denom : 0;
+    lossPerWeightCache[sgi] = lpw;
+  }
+
+  const yc = Math.min(year, PROJECTION_END);
+  return Math.max(0, latestArea - lpw * (cumWeight[yc] - cumWeight[LATEST_INVENTORY_YEAR]));
+}
+
+// Unified area getter: measured interpolation for ≤ LATEST_INVENTORY_YEAR,
+// projection model for future years.
+function getAreaForYear(sgi, year) {
+  if (year > LATEST_INVENTORY_YEAR && cumWeight) {
+    return getProjectedArea(sgi, year);
+  }
+  return getInterpolatedArea(sgi, year);
+}
+
 function styleInventoryFeature(year, opacity) {
+  const proj = isProjected(selectedYear);
   return feature => {
     const sgi = feature.properties.SGI;
     const isActive = sgi === activeGlacierSGI;
     const isStory = STORY_GLACIERS[sgi];
     const lossPct = getRelativeLossPct(sgi, selectedYear);
     return {
-      stroke: isActive || isStory,
-      color: isActive ? '#08233a' : isStory ? '#ffffff' : '#16384d',
-      weight: isActive ? 2.5 : isStory ? 1.8 : 0.5,
+      stroke: isActive || isStory || proj,
+      color: isActive ? '#08233a' : isStory ? '#ffffff' : proj ? '#9a6b3a' : '#16384d',
+      weight: isActive ? 2.5 : isStory ? 1.8 : proj ? 1.2 : 0.5,
       fillColor: velocityVisible ? '#1b4f72' : getLossColor(lossPct),
-      fillOpacity: velocityVisible ? 0.78 : Math.max(0.08, opacity * (isActive ? 0.92 : 0.74)),
+      fillOpacity: velocityVisible ? 0.78 : Math.max(0.08, opacity * (isActive ? 0.92 : proj ? 0.55 : 0.74)),
       opacity: velocityVisible ? 0.9 : Math.max(0.12, opacity),
-      dashArray: isStory && !isActive ? '4,5' : null
+      dashArray: proj && !isActive ? '6,4' : isStory && !isActive ? '4,5' : null
     };
   };
 }
@@ -418,6 +480,7 @@ function updateStats(year) {
   const countEl = document.getElementById('totalGlaciers');
   const areaEl = document.getElementById('totalArea');
   const changeEl = document.getElementById('totalChange');
+  const proj = isProjected(year);
 
   if (velocityVisible) {
     countEl.textContent = VELOCITY_GLACIER_NAMES.size;
@@ -430,20 +493,21 @@ function updateStats(year) {
   let totalArea = 0;
   let baselineArea = 0;
   if (activeGlacierSGI) {
-    totalArea = getInterpolatedArea(activeGlacierSGI, year);
+    totalArea = getAreaForYear(activeGlacierSGI, year);
     baselineArea = baselineAreaBySGI[activeGlacierSGI] || 0;
     countEl.textContent = '1';
   } else {
     Object.keys(baselineAreaBySGI).forEach(sgi => {
-      totalArea += getInterpolatedArea(sgi, year);
+      totalArea += getAreaForYear(sgi, year);
       baselineArea += baselineAreaBySGI[sgi];
     });
     countEl.textContent = Object.keys(baselineAreaBySGI).length;
   }
 
-  areaEl.textContent = totalArea.toFixed(1);
+  const prefix = proj ? '~' : '';
+  areaEl.textContent = `${prefix}${totalArea.toFixed(1)}`;
   const change = baselineArea ? ((totalArea - baselineArea) / baselineArea) * 100 : 0;
-  changeEl.textContent = `${change > 0 ? '+' : ''}${change.toFixed(1)}%`;
+  changeEl.textContent = `${prefix}${change > 0 ? '+' : ''}${change.toFixed(1)}%`;
   changeEl.style.color = change < 0 ? 'var(--danger)' : 'var(--accent-green)';
 }
 
@@ -480,6 +544,10 @@ async function updateGlacierPolygons(year) {
 function scheduleGlacierUpdate(year) {
   selectedYear = Number(year);
   yearDisplay.textContent = selectedYear;
+  const proj = isProjected(selectedYear);
+  const badge = document.getElementById('projBadge');
+  if (badge) badge.style.display = proj ? 'inline-block' : 'none';
+  yearDisplay.classList.toggle('projected', proj);
   if (scheduledRender) cancelAnimationFrame(scheduledRender);
   scheduledRender = requestAnimationFrame(() => {
     scheduledRender = null;
@@ -489,7 +557,7 @@ function scheduleGlacierUpdate(year) {
 
 function drawSliderTicks() {
   ticks.innerHTML = '';
-  INVENTORY_YEARS.forEach(year => {
+  INVENTORY_YEARS.forEach((year, i) => {
     const tick = document.createElement('span');
     tick.className = 'slider-tick';
     tick.textContent = year;
@@ -500,6 +568,26 @@ function drawSliderTicks() {
     });
     ticks.appendChild(tick);
   });
+  // End-of-projection tick (2050)
+  const endTick = document.createElement('span');
+  endTick.className = 'slider-tick proj-tick';
+  endTick.textContent = PROJECTION_END;
+  endTick.style.left = '100%';
+  endTick.style.transform = 'translateX(-100%)';
+  endTick.addEventListener('click', () => { yearSlider.value = PROJECTION_END; scheduleGlacierUpdate(PROJECTION_END); });
+  ticks.appendChild(endTick);
+}
+
+function buildProjectionZone() {
+  const existing = document.querySelector('.projection-zone');
+  if (existing) existing.remove();
+  const projPct = ((LATEST_INVENTORY_YEAR - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100;
+  const zone = document.createElement('div');
+  zone.className = 'projection-zone';
+  zone.style.left = projPct + '%';
+  zone.style.width = (100 - projPct) + '%';
+  zone.innerHTML = '<span class="projection-label">Projection</span>';
+  document.getElementById('mainSliderRow').appendChild(zone);
 }
 
 function updateInventoryUI() {
@@ -509,9 +597,10 @@ function updateInventoryUI() {
   yearDisplay.textContent = yearSlider.value;
   const sliderNote = document.getElementById('inventorySliderNote');
   if (sliderNote) {
-    sliderNote.textContent = `Measured inventory years: ${INVENTORY_YEARS.join(', ')}. Intermediate years are interpolated visually. Latest inventory: ${latestInventoryLabel}.`;
+    sliderNote.textContent = `Measured inventory years: ${INVENTORY_YEARS.join(', ')}. Years ${LATEST_INVENTORY_YEAR + 1}–${PROJECTION_END} are projected. Latest inventory: ${latestInventoryLabel}.`;
   }
   drawSliderTicks();
+  buildProjectionZone();
 }
 
 const velTicks = document.getElementById('velSliderTicks');
@@ -554,13 +643,50 @@ async function drawGlacierChart(sgi, currentYear) {
   const drawWidth = svgWidth - padLeft - padRight;
   const drawHeight = svgHeight - padTop - padBottom;
   const yMax = Math.max(...data.map(d => d.area)) * 1.15;
-  const interpolatedArea = getInterpolatedArea(sgi, currentYear);
+  const currentArea = getAreaForYear(sgi, currentYear);
   const getX = year => padLeft + ((year - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * drawWidth;
   const getY = area => (padTop + drawHeight) - ((area / yMax) * drawHeight);
-  const linePoints = data.map(d => `${getX(d.year)},${getY(d.area)}`).join(' ');
-  const polyPoints = `${getX(data[0].year)},${padTop + drawHeight} ${linePoints} ${getX(data[data.length - 1].year)},${padTop + drawHeight}`;
+
+  // Build sampled curve: solid measured + dashed projected
+  const histPoints = [];
+  const projPoints = [];
+  for (let y = MIN_YEAR; y <= PROJECTION_END; y += 2) {
+    const a = getAreaForYear(sgi, y);
+    if (a == null) continue;
+    const p = `${getX(y).toFixed(1)},${getY(a).toFixed(1)}`;
+    if (y <= LATEST_INVENTORY_YEAR) histPoints.push(p);
+    if (y >= LATEST_INVENTORY_YEAR) projPoints.push(p);
+  }
+  // Ensure boundary point
+  const boundA = getAreaForYear(sgi, LATEST_INVENTORY_YEAR);
+  const boundP = `${getX(LATEST_INVENTORY_YEAR).toFixed(1)},${getY(boundA).toFixed(1)}`;
+  if (histPoints[histPoints.length - 1] !== boundP) histPoints.push(boundP);
+  if (projPoints[0] !== boundP) projPoints.unshift(boundP);
+  // Ensure 2050 endpoint
+  const endA = getAreaForYear(sgi, PROJECTION_END);
+  const endP = `${getX(PROJECTION_END).toFixed(1)},${getY(endA).toFixed(1)}`;
+  if (projPoints[projPoints.length - 1] !== endP) projPoints.push(endP);
+
+  const histLine = histPoints.join(' ');
+  const projLine = projPoints.join(' ');
+
+  // Fill polygon (measured section only)
+  const polyPoints = `${getX(data[0].year)},${padTop + drawHeight} ${histLine} ${getX(data[data.length - 1].year)},${padTop + drawHeight}`;
+
   const activeX = getX(currentYear);
-  const activeY = getY(interpolatedArea);
+  const activeY = getY(currentArea);
+  const isProj = isProjected(currentYear);
+  const prefix = isProj ? '~' : '';
+
+  // Projection zone background
+  const projX = getX(LATEST_INVENTORY_YEAR);
+  const projZoneSVG = cumWeight ? `
+    <rect x="${projX}" y="${padTop}" width="${svgWidth - padRight - projX}" height="${drawHeight}"
+          fill="url(#projStripes)" opacity="0.3" />
+    <line x1="${projX}" y1="${padTop - 2}" x2="${projX}" y2="${padTop + drawHeight + 2}"
+          stroke="var(--accent-warm, #d35400)" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6" />
+    <text x="${projX + 4}" y="${padTop + 12}" fill="var(--accent-warm, #d35400)" font-size="8" font-weight="700" letter-spacing="0.8" opacity="0.7">PROJECTED</text>
+  ` : '';
 
   const yAxisSVG = [yMax, yMax / 2, 0].map(value => {
     const y = getY(value);
@@ -568,9 +694,14 @@ async function drawGlacierChart(sgi, currentYear) {
       <line x1="${padLeft - 20}" y1="${y}" x2="${svgWidth - padRight}" y2="${y}" class="chart-grid-line" />`;
   }).join('');
 
-  const xAxisSVG = data.map((d, index) => {
+  // X-axis: measured inventory ticks + 2050
+  const xTicks = [...data];
+  if (cumWeight) xTicks.push({ year: PROJECTION_END, area: endA });
+  const xAxisSVG = xTicks.map((d, index) => {
     const yOffset = index % 2 === 0 ? 28 : 15;
-    return `<text x="${getX(d.year)}" y="${padTop + drawHeight + yOffset}" class="chart-axis-text" text-anchor="middle">${d.year}</text>`;
+    const isEnd = d.year === PROJECTION_END;
+    return `<text x="${getX(d.year)}" y="${padTop + drawHeight + yOffset}" class="chart-axis-text" text-anchor="middle"
+      ${isEnd ? 'fill="var(--accent-warm, #d35400)" font-weight="700"' : ''}>${d.year}</text>`;
   }).join('');
 
   const pointsSVG = data.map(d => `<circle cx="${getX(d.year)}" cy="${getY(d.area)}" r="3" class="chart-point" />`).join('');
@@ -582,14 +713,19 @@ async function drawGlacierChart(sgi, currentYear) {
           <stop offset="0%" stop-color="var(--glacier-light, #85c1e9)" stop-opacity="0.4" />
           <stop offset="100%" stop-color="var(--glacier-light, #85c1e9)" stop-opacity="0" />
         </linearGradient>
+        <pattern id="projStripes" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="6" stroke="var(--accent-warm, #d35400)" stroke-width="1" />
+        </pattern>
       </defs>
       ${yAxisSVG}
+      ${projZoneSVG}
       <polygon points="${polyPoints}" fill="url(#areaGradient)" />
-      <polyline points="${linePoints}" class="chart-main-line" />
+      <polyline points="${histLine}" class="chart-main-line" />
+      ${cumWeight ? `<polyline points="${projLine}" class="chart-main-line chart-proj-line" />` : ''}
       ${xAxisSVG}
       ${pointsSVG}
       <line x1="${activeX}" y1="${activeY}" x2="${activeX}" y2="${padTop + drawHeight}" class="chart-active-line" />
-      <text x="${activeX}" y="${activeY - 12}" class="chart-active-text" text-anchor="middle">${currentYear}: ${interpolatedArea.toFixed(2)}</text>
+      <text x="${activeX}" y="${activeY - 12}" class="chart-active-text" text-anchor="middle">${prefix}${currentYear}: ${currentArea.toFixed(2)}</text>
       <circle cx="${activeX}" cy="${activeY}" r="4.5" class="chart-active-point" />
     </svg>`;
 }
@@ -1033,6 +1169,27 @@ function setupIntro() {
   });
 }
 
+async function loadProjectionData() {
+  try {
+    const [tempResp, massResp] = await Promise.all([
+      fetch('../data/temperature_anomaly.json'),
+      fetch('../data/glamos_massbalance.json')
+    ]);
+    if (tempResp.ok) {
+      const tempData = await tempResp.json();
+      tempAnomaly = {};
+      Object.entries(tempData.anomaly || {}).forEach(([y, v]) => { tempAnomaly[Number(y)] = v; });
+    }
+    if (massResp.ok) {
+      glamosMass = await massResp.json();
+    }
+    buildCumWeight();
+    console.log('Projection model loaded: temperature anomaly + mass balance data');
+  } catch (error) {
+    console.warn('Projection data unavailable; timeline capped at latest inventory.', error);
+  }
+}
+
 async function initApp() {
   replayStoryBtn.disabled = true;
   document.getElementById('introPlay').disabled = true;
@@ -1047,24 +1204,30 @@ async function initApp() {
   try {
     await ensureInventoryYear(2023);
     INVENTORY_YEARS = [...FULL_INVENTORY_YEARS];
-    MAX_YEAR = 2023;
     LATEST_INVENTORY_YEAR = 2023;
     latestInventoryLabel = 'SGI2023 / 2021–2024 imagery';
   } catch (error) {
     console.warn('SGI2023 inventory unavailable; falling back to 2016.', error);
     INVENTORY_YEARS = [...BASE_INVENTORY_YEARS];
-    MAX_YEAR = 2016;
     LATEST_INVENTORY_YEAR = 2016;
     latestInventoryLabel = '2016 inventory';
   }
 
-  updateInventoryUI();
   await Promise.all(INVENTORY_YEARS.map(year => ensureInventoryYear(year)));
 
   geojsonCache[MIN_YEAR].features.forEach(feature => {
     baselineAreaBySGI[feature.properties.SGI] = getFeatureAreaKm2(feature);
   });
 
+  // Load projection data (temperature + mass balance) and extend timeline to 2050
+  await loadProjectionData();
+  if (cumWeight) {
+    MAX_YEAR = PROJECTION_END;
+  } else {
+    MAX_YEAR = LATEST_INVENTORY_YEAR;
+  }
+
+  updateInventoryUI();
   setupIntro();
   replayStoryBtn.disabled = false;
   document.getElementById('introPlay').disabled = false;
