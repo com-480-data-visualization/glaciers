@@ -1,6 +1,6 @@
 # Swiss Glaciers — COM-480 Data Visualization
 
-Interactive visualization of Swiss glacier retreat across space, time, and measurement type. The project combines historical glacier outlines, glacier-specific length-change records, and flow-velocity measurements to make Swiss glacier change readable for a broad audience.
+Guided and exploratory visualization of Swiss glacier retreat across space, time, and measurement type. The project combines a story-driven map, historical glacier outlines, glacier-specific length-change records, and flow-velocity measurements to make Swiss glacier change readable for a broad audience.
 
 | Student | SCIPER |
 | --- | --- |
@@ -20,6 +20,8 @@ https://com-480-data-visualization.github.io/glaciers/
 ## Project idea
 
 Scientific glacier datasets are detailed but often difficult to read for non-experts. Existing monitoring platforms expose many layers, metrics, and controls at once. Our goal is different: provide a public-facing visualization where the main retreat pattern is visible immediately, while still allowing users to drill down into measured data.
+
+The final site combines a guided story with free exploration. The story introduces the main message that Swiss glaciers are not only shrinking, but shrinking unevenly, then zooms into Aletsch, Gorner, and Rhone as concrete case studies.
 
 The visualization is built around three complementary questions:
 
@@ -52,11 +54,16 @@ Do not open `docs/index.html` directly as a local file if you want all data load
 
 ## Main interactions
 
-- Use the **timeline slider** to switch between historical glacier inventory years.
+- Start, skip, or replay the guided story from the map interface.
+- Follow story chapters that zoom into the Valais and Bernese Alps, then into Aletsch, Gorner, and Rhone.
+- Use the **timeline slider** to scrub between historical glacier inventory years.
+- Interpret glacier color as relative area loss since 1850.
+- View the dashed orange 1850 footprint as a lost-ice reference overlay for later years.
 - Click glacier polygons to inspect a glacier and see its area evolution.
+- Scrub the popup area chart to update the selected map year.
 - Open the selected glacier pages for detailed D3 length-change charts.
 - Enable **Flow Velocity** mode to show measured glacier movement where GLAMOS velocity data is available.
-- In velocity mode, use the velocity year slider to inspect different measurement years.
+- In velocity mode, use the velocity year slider or play button to inspect different measurement years.
 - Zoom in to see individual velocity stakes; zoomed-out views aggregate arrows by glacier.
 
 ## Repository structure
@@ -66,6 +73,7 @@ Do not open `docs/index.html` directly as a local file if you want all data load
 ├── README.md
 ├── Milestone1_Report.pdf
 ├── Milestone2_Report.pdf
+├── Milestone3_ProcessBook.pdf
 ├── docs/
 │   ├── index.html                 # Landing page
 │   ├── style.css                  # Shared site styling
@@ -79,8 +87,8 @@ Do not open `docs/index.html` directly as a local file if you want all data load
 │   │   ├── rhone.html             # Glacier detail page
 │   │   └── glacier-charts.js      # D3 length-change charts
 │   ├── velocity/
-│   │   ├── local_velocity_view.html
-│   │   └── velocity_map.html
+│   │   ├── sandbox.html              # Development sandbox, not part of the main user flow
+│   │   └── velocity_map.html         # Legacy standalone velocity exploration
 │   └── data/
 │       ├── glaciers_1850.geojson
 │       ├── glaciers_1931.geojson
@@ -131,7 +139,9 @@ The main map loads one GeoJSON file per inventory year:
 | 2016 | `docs/data/glaciers_2016.geojson` | Modern outline inventory |
 | 2023 | `docs/data/glaciers_2023.geojson` | SGI2023 / 2021–2024 imagery |
 
-The current map uses a named, matched subset of glacier polygons. It should not be interpreted as every raw polygon from the original GLAMOS inventories. This makes temporal comparison clearer, but it excludes glaciers that are unnamed, unmatched, newly split/merged, or otherwise difficult to compare across inventories.
+For historical comparison, the map uses the glaciers present in the 1850 baseline set. This is important for SGI2023: `docs/data/glaciers_2023.geojson` contains a broader inventory than the older matched files, so the frontend filters the displayed 2023 polygons to the baseline SGIs when showing area-loss comparisons.
+
+The map should therefore be interpreted as a comparable glacier-retreat visualization, not as a display of every raw polygon from every GLAMOS inventory. This makes temporal comparison clearer, but it excludes glaciers that are unnamed, unmatched, newly split/merged, or otherwise difficult to compare across inventories.
 
 ### Length-change data
 
@@ -199,7 +209,8 @@ No build step is required.
 
 ## Known limitations
 
-- The outline map uses a matched subset of named glaciers, not the full raw inventory.
+- The outline map uses a matched 1850-baseline subset for historical comparison, not the full raw inventory.
+- SGI2023 is included as the latest outline inventory, but its broader raw coverage is filtered to comparable baseline SGIs in the main retreat view.
 - Area outlines are available only for selected inventory years: 1850, 1931, 1973, 2010, 2016, and SGI2023 / 2021–2024 imagery when `docs/data/glaciers_2023.geojson` loads.
 - 2025 CSV files are used only as mass-balance, volume, and velocity context; they are not area-outline geometry.
 - Length-change and area are different metrics and should not be treated as interchangeable.

@@ -217,6 +217,11 @@ function findFeatureBySGI(geojson, sgi) {
   return geojson?.features?.find(f => f.properties.SGI === sgi) || null;
 }
 
+function isComparableGlacier(feature) {
+  const sgi = feature?.properties?.SGI;
+  return Boolean(sgi && Object.prototype.hasOwnProperty.call(baselineAreaBySGI, sgi));
+}
+
 function getInventoryBracket(year) {
   const y = Math.max(MIN_YEAR, Math.min(MAX_YEAR, Number(year)));
   for (let i = 0; i < INVENTORY_YEARS.length - 1; i++) {
@@ -332,9 +337,14 @@ function bindGlacierInteractions(layer, feature) {
 }
 
 function buildDisplayData(geojson) {
-  const features = velocityVisible
-    ? geojson.features.filter(f => VELOCITY_GLACIER_NAMES.has(f.properties['glacier name']))
-    : geojson.features;
+  let features = geojson.features;
+
+  if (velocityVisible) {
+    features = features.filter(f => VELOCITY_GLACIER_NAMES.has(f.properties['glacier name']));
+  } else {
+    features = features.filter(isComparableGlacier);
+  }
+
   return { ...geojson, features };
 }
 
