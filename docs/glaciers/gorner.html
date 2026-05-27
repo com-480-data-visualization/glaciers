@@ -54,7 +54,7 @@
     .glacier-description {
       font-size: 1.1rem;
       line-height: 1.7;
-      color: #e0e0e0;
+      color: var(--earth-800);
       margin-bottom: 30px;
       padding: 20px;
       background: var(--bg-card);
@@ -86,7 +86,7 @@
       padding: 12px 20px;
       text-align: left;
       border-bottom: 1px solid var(--border-color);
-      color: #e0e0e0;
+      color: var(--earth-800);
     }
     .data-table th {
       color: var(--accent-color);
@@ -133,7 +133,7 @@
     .fun-fact-content p {
       font-size: 1rem;
       line-height: 1.6;
-      color: #e0e0e0;
+      color: var(--earth-800);
       margin: 0;
     }
   </style>
@@ -170,8 +170,8 @@
           <div class="stat-label">Type</div>
         </div>
         <div class="stat-box">
-          <div class="stat-value">35.4 km²</div>
-          <div class="stat-label">Est. Area (2025)</div>
+          <div class="stat-value">41.23 km²</div>
+          <div class="stat-label">2016 Inventory Area</div>
         </div>
       </div>
 
@@ -188,7 +188,7 @@
       </div>
 
       <div class="fun-fact">
-        <div class="fun-fact-icon">💡</div>
+        <div class="fun-fact-icon"></div>
         <div class="fun-fact-content">
           <h4>Fun Fact</h4>
           <p>A notable feature of this glacier is the Gornersee, an ice marginal lake at the confluence area of the Gorner Glacier and Grenzgletscher. This lake fills every year and drains in summer, usually as a glacial lake outburst flood. This is one of only a few glacial lakes in the Alps exhibiting this behavior.</p>
@@ -212,9 +212,9 @@
       </article>
 
       <article class="iframe-card">
-        <h3>Area Evolution (1973 - 2025)</h3>
+        <h3>Area Evolution from Inventory Outlines (1850–2016)</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
-          Historical surface area measurements and calculated percentage loss relative to the 1973 baseline.
+          Values are computed from the included GLAMOS inventory polygons. Loss is relative to the 1850 outline.
         </p>
         <table class="data-table">
           <thead>
@@ -225,17 +225,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td>1973</td><td>57.5</td><td>0.0%</td></tr>
-            <tr><td>1980</td><td>56.0</td><td style="color: var(--danger)">-2.6%</td></tr>
-            <tr><td>1985</td><td>54.5</td><td style="color: var(--danger)">-5.2%</td></tr>
-            <tr><td>1990</td><td>53.0</td><td style="color: var(--danger)">-7.8%</td></tr>
-            <tr><td>1995</td><td>51.5</td><td style="color: var(--danger)">-10.4%</td></tr>
-            <tr><td>2000</td><td>49.5</td><td style="color: var(--danger)">-13.9%</td></tr>
-            <tr><td>2005</td><td>47.0</td><td style="color: var(--danger)">-18.3%</td></tr>
-            <tr><td>2010</td><td>44.5</td><td style="color: var(--danger)">-22.6%</td></tr>
-            <tr><td>2015</td><td>42.0</td><td style="color: var(--danger)">-26.9%</td></tr>
-            <tr><td>2020</td><td>39.0</td><td style="color: var(--danger)">-32.2%</td></tr>
-            <tr><td>2025</td><td>36.5</td><td style="color: var(--danger)">-36.5%</td></tr>
+            <tr><td>1850</td><td>65.55</td><td>0.0%</td></tr>
+            <tr><td>1931</td><td>62.44</td><td style="color: var(--danger)">-4.7%</td></tr>
+            <tr><td>1973</td><td>59.53</td><td style="color: var(--danger)">-9.2%</td></tr>
+            <tr><td>2010</td><td>41.59</td><td style="color: var(--danger)">-36.6%</td></tr>
+            <tr><td>2016</td><td>41.23</td><td style="color: var(--danger)">-37.1%</td></tr>
           </tbody>
         </table>
       </article>

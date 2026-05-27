@@ -79,8 +79,8 @@ Do not open `docs/index.html` directly as a local file if you want all data load
 │   │   ├── rhone.html             # Glacier detail page
 │   │   └── glacier-charts.js      # D3 length-change charts
 │   ├── velocity/
-│   │   ├── sandbox.html           # Earlier velocity prototype / development view
-│   │   └── velocity_map.html      # Standalone velocity prototype
+│   │   ├── local_velocity_view.html
+│   │   └── velocity_map.html
 │   └── data/
 │       ├── glaciers_1850.geojson
 │       ├── glaciers_1931.geojson
@@ -198,7 +198,7 @@ No build step is required.
 - Length-change and area are different metrics and should not be treated as interchangeable.
 - Velocity data is available only for selected glaciers and years.
 - The velocity layer uses an in-browser coordinate conversion from Swiss projected coordinates to WGS84.
-- Some development/prototype files remain in `docs/velocity/`; the main final flow-velocity interaction is now integrated into `docs/map/`.
+- The main final flow-velocity interaction is integrated into `docs/map/`.
 
 ## Milestone reports
 

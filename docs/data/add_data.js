@@ -194,7 +194,7 @@ const glaciers = [
     lat: 46.3850, lng: 7.5100,
     elevation: "2650–2900 m",
     type: "Plateau glacier",
-    description: "The largest plateau glacier in the European Alps. Its flat surface causes meltwater to collect in dangerous glacial lakes. In 2018 a glacial lake drained catastrophically, causing flooding downstream.",
+    description: "The largest plateau glacier in the European Alps. Its flat surface causes melt water to collect in dangerous glacial lakes. In 2018 a glacial lake drained catastrophically, causing flooding downstream.",
     tags: ["Plateau glacier", "Glacial lakes", "Flood risk", "Crans-Montana"],
     areaByYear: { 1973: 10.0, 1980: 9.7, 1985: 9.4, 1990: 9.0, 1995: 8.6, 2000: 8.1, 2005: 7.5, 2010: 6.8, 2015: 6.0, 2020: 5.2, 2025: 4.5 }
   },

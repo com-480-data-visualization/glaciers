@@ -2,37 +2,38 @@
 
 /* --- 1. The Color Palette (CSS Variables) --- */
 :root {
-    --earth-900: #1a1510;
-    --earth-800: #2d261d;
-    --earth-700: #3e3527;
-    --earth-600: #5c4f3a;
-    --earth-500: #7a6b52;
-    --earth-400: #a89880;
-    --earth-300: #c4b8a4;
-    --earth-200: #e0d8cc;
-    --earth-100: #f0ece4;
-    --earth-50:  #f8f5f0;
+    --earth-900: #1a1a1a;
+    --earth-800: #2d2d2d;
+    --earth-700: #4a4a4a;
+    --earth-600: #666666;
+    --earth-500: #888888;
+    --earth-400: #aaaaaa;
+    --earth-300: #cccccc;
+    --earth-200: #e5e5e5;
+    --earth-100: #ffffff;
+    --earth-50:  #f4f6f8;
     --glacier-deep: #1a5276;
     --glacier-mid: #2e86c1;
     --glacier-light: #85c1e9;
     --glacier-pale: #d4e6f1;
     --glacier-ice: #e8f4fd;
-    --accent-warm: #c0713a;
-    --accent-green: #4a7c59;
-    --danger: #c0392b;
-    --shadow-sm: 0 1px 3px rgba(26,21,16,0.12);
-    --shadow-md: 0 4px 12px rgba(26,21,16,0.15);
-    --shadow-lg: 0 8px 32px rgba(26,21,16,0.2);
-    --shadow-xl: 0 16px 48px rgba(26,21,16,0.25);
+    --accent-warm: #d35400;
+    --accent-green: #27ae60;
+    --danger: #e74c3c;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --shadow-xl: 0 16px 48px rgba(0,0,0,0.16);
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 20px;
-    --bg-card: #1e1e1e;         /* Slightly lighter for the iframe cards */
-    --bg-topbar: #181818;       /* Almost black for the header */
-    --text-main: #1f1d1d;       /* Soft white for readability */
-    --text-muted: #a0a0a0;      /* Gray for secondary text */
-    --accent-color: #4ea8de;    /* A sleek "data" blue for links/highlights */
-    --border-color: var(--earth-700);
+    --bg-main: var(--earth-50);
+    --bg-card: var(--earth-100);
+    --bg-topbar: var(--earth-100);
+    --text-main: var(--earth-900);
+    --text-muted: var(--earth-600);
+    --accent-color: var(--glacier-mid);
+    --border-color: var(--earth-200);
   }
 
 /* --- 2. Basic Reset --- */
@@ -44,7 +45,7 @@
 
 header {
     position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-    background: linear-gradient(135deg, var(--earth-800) 0%, var(--earth-700) 100%);
+    background: linear-gradient(135deg, var(--earth-100) 0%, var(--earth-50) 100%);
     padding: 14px 28px;
     display: flex; align-items: center; justify-content: space-between;
     box-shadow: var(--shadow-lg);
@@ -61,7 +62,7 @@ header {
   }
   .logo-text h1 {
     font-family: 'DM Serif Display', serif;
-    font-size: 20px; color: var(--earth-50);
+    font-size: 20px; color: var(--earth-900);
     letter-spacing: 0.5px;
   }
   .logo-text span {
@@ -93,6 +94,37 @@ header {
     font-size: 3rem;
     color: var(--text-main);
     margin-bottom: 10px;
+}
+.body-text {
+    max-width: 760px;
+    margin: 0 auto;
+    color: var(--earth-700);
+    font-size: 1.08rem;
+    line-height: 1.7;
+    text-align: center;
+}
+.hero-cta {
+    display: flex;
+    justify-content: center;
+    margin-top: -34px;
+}
+.primary-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 8px;
+    background: var(--glacier-deep);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 800;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.primary-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 body {
@@ -154,11 +186,11 @@ body {
 
 /* --- 6. The iFrame Containers --- */
 .iframe-card {
-    background: linear-gradient(135deg, var(--earth-800) 0%, var(--earth-700) 100%);
+    background: var(--bg-card);
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 8px;
     border: 1px solid var(--border-color);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5); /* Stronger shadow for depth in dark mode */
+    box-shadow: var(--shadow-md);
     margin-bottom: 28px;
 }
 .iframe-card h3 {
@@ -185,14 +217,14 @@ body {
 
 .clickable-box {
     flex: 1; /* Makes all three boxes equally wide */
-    background: linear-gradient(135deg, var(--earth-800) 0%, var(--earth-700) 100%);
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 30px 20px;
     text-align: center;
     text-decoration: none;
     color: var(--text-main);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: var(--shadow-md);
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -210,6 +242,39 @@ body {
 /* The hover effect makes them feel truly interactive */
 .clickable-box:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    box-shadow: var(--shadow-lg);
     border-color: var(--accent-color);
+}
+
+.glacier-description,
+.fun-fact-content p,
+.data-table th,
+.data-table td {
+    color: var(--earth-800) !important;
+}
+
+.stat-box,
+.glacier-description,
+.fun-fact {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.fun-fact-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--glacier-ice);
+    color: var(--glacier-deep);
+    font-size: 0 !important;
+    font-weight: 800;
+}
+.fun-fact-icon::before {
+    content: "i";
+    font-size: 18px;
+    font-family: 'DM Serif Display', serif;
 }

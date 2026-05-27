@@ -54,7 +54,7 @@
     .glacier-description {
       font-size: 1.1rem;
       line-height: 1.7;
-      color: #e0e0e0;
+      color: var(--earth-800);
       margin-bottom: 30px;
       padding: 20px;
       background: var(--bg-card);
@@ -86,7 +86,7 @@
       padding: 12px 20px;
       text-align: left;
       border-bottom: 1px solid var(--border-color);
-      color: #e0e0e0;
+      color: var(--earth-800);
     }
     .data-table th {
       color: var(--accent-color);
@@ -133,7 +133,7 @@
     .fun-fact-content p {
       font-size: 1rem;
       line-height: 1.6;
-      color: #e0e0e0;
+      color: var(--earth-800);
       margin: 0;
     }
   </style>
@@ -170,8 +170,8 @@
           <div class="stat-label">Type</div>
         </div>
         <div class="stat-box">
-          <div class="stat-value">13.6 km²</div>
-          <div class="stat-label">Est. Area (2023)</div>
+          <div class="stat-value">14.64 km²</div>
+          <div class="stat-label">2016 Inventory Area</div>
         </div>
       </div>
 
@@ -187,7 +187,7 @@
       </div>
 
       <div class="fun-fact">
-        <div class="fun-fact-icon">💡</div>
+        <div class="fun-fact-icon"></div>
         <div class="fun-fact-content">
           <h4>Fun Fact</h4>
           <p>The glacier was the subject of a poem by Victor Hugo, <em>Dicté en présence du glacier du Rhône</em>, in the collection <em>Les Feuilles d'automne</em> (<em>Autumn Leaves</em>).</p>
@@ -211,9 +211,9 @@
       </article>
 
       <article class="iframe-card">
-        <h3>Area Evolution (1973 - 2025)</h3>
+        <h3>Area Evolution from Inventory Outlines (1850–2016)</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
-          Historical surface area measurements and calculated percentage loss relative to the 1973 baseline.
+          Values are computed from the included GLAMOS inventory polygons. Loss is relative to the 1850 outline.
         </p>
         <table class="data-table">
           <thead>
@@ -224,17 +224,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td>1973</td><td>17.0</td><td>0.0%</td></tr>
-            <tr><td>1980</td><td>16.5</td><td style="color: var(--danger)">-2.9%</td></tr>
-            <tr><td>1985</td><td>16.0</td><td style="color: var(--danger)">-5.9%</td></tr>
-            <tr><td>1990</td><td>15.4</td><td style="color: var(--danger)">-9.4%</td></tr>
-            <tr><td>1995</td><td>14.7</td><td style="color: var(--danger)">-13.5%</td></tr>
-            <tr><td>2000</td><td>13.9</td><td style="color: var(--danger)">-18.2%</td></tr>
-            <tr><td>2005</td><td>13.0</td><td style="color: var(--danger)">-23.5%</td></tr>
-            <tr><td>2010</td><td>12.0</td><td style="color: var(--danger)">-29.4%</td></tr>
-            <tr><td>2015</td><td>10.8</td><td style="color: var(--danger)">-36.5%</td></tr>
-            <tr><td>2020</td><td>9.6</td><td style="color: var(--danger)">-43.5%</td></tr>
-            <tr><td>2025</td><td>8.5</td><td style="color: var(--danger)">-50.0%</td></tr>
+            <tr><td>1850</td><td>20.00</td><td>0.0%</td></tr>
+            <tr><td>1931</td><td>18.11</td><td style="color: var(--danger)">-9.4%</td></tr>
+            <tr><td>1973</td><td>17.44</td><td style="color: var(--danger)">-12.8%</td></tr>
+            <tr><td>2010</td><td>15.31</td><td style="color: var(--danger)">-23.5%</td></tr>
+            <tr><td>2016</td><td>14.64</td><td style="color: var(--danger)">-26.8%</td></tr>
           </tbody>
         </table>
       </article>

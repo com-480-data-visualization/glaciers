@@ -1,7 +1,7 @@
 (function () {
   const ACCENT  = '#4ea8de';
-  const MUTED   = '#a0a0a0';
-  const GRID    = '#3e3527';
+  const MUTED   = '#666666';
+  const GRID    = '#e5e5e5';
 
   const MARGIN = { top: 20, right: 24, bottom: 44, left: 72 };
   const HEIGHT = 260;

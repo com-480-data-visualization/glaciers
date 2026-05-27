@@ -55,7 +55,7 @@
     .glacier-description {
       font-size: 1.1rem;
       line-height: 1.7;
-      color: #e0e0e0;
+      color: var(--earth-800);
       margin-bottom: 30px;
       padding: 20px;
       background: var(--bg-card);
@@ -88,7 +88,7 @@
       padding: 12px 20px;
       text-align: left;
       border-bottom: 1px solid var(--border-color);
-      color: #e0e0e0; /* Forces the standard table text to be light! */
+      color: var(--earth-800)
     }
     .data-table th {
       color: var(--accent-color);
@@ -135,7 +135,7 @@
     .fun-fact-content p {
       font-size: 1rem;
       line-height: 1.6;
-      color: #e0e0e0;
+      color: var(--earth-800);
       margin: 0;
     }
   </style>
@@ -172,8 +172,8 @@
           <div class="stat-label">Type</div>
         </div>
         <div class="stat-box">
-          <div class="stat-value">75.79 km²</div>
-          <div class="stat-label">Est. Area (2023)</div>
+          <div class="stat-value">78.49 km²</div>
+          <div class="stat-label">2016 Inventory Area</div>
         </div>
       </div>
 
@@ -189,7 +189,7 @@
       </div>
 
       <div class="fun-fact">
-        <div class="fun-fact-icon">💡</div>
+        <div class="fun-fact-icon"></div>
         <div class="fun-fact-content">
           <h4>Fun Fact</h4>
           <p>The Jungfraujoch railway station, at an elevation of 3,454 metres is the highest in Europe. It is located on the Jungfraubahn, a cogwheel train that runs from Kleine Scheidegg to the Jungfraujoch, passing through the Eiger and Mönch mountains. The station offers stunning views of the Aletschgletscher and surrounding peaks, making it a popular tourist destination.</p>
@@ -213,9 +213,9 @@
       </article>
 
       <article class="iframe-card">
-        <h3>Area Evolution (1973 - 2025)</h3>
+        <h3>Area Evolution from Inventory Outlines (1850–2016)</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
-          Historical surface area measurements and calculated percentage loss relative to the 1973 baseline.
+          Values are computed from the included GLAMOS inventory polygons. Loss is relative to the 1850 outline.
         </p>
         <table class="data-table">
           <thead>
@@ -226,17 +226,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td>1973</td><td>82.5</td><td>0.0%</td></tr>
-            <tr><td>1980</td><td>80.2</td><td style="color: var(--danger)">-2.8%</td></tr>
-            <tr><td>1985</td><td>78.5</td><td style="color: var(--danger)">-4.8%</td></tr>
-            <tr><td>1990</td><td>76.8</td><td style="color: var(--danger)">-6.9%</td></tr>
-            <tr><td>1995</td><td>75.0</td><td style="color: var(--danger)">-9.1%</td></tr>
-            <tr><td>2000</td><td>73.0</td><td style="color: var(--danger)">-11.5%</td></tr>
-            <tr><td>2005</td><td>70.5</td><td style="color: var(--danger)">-14.5%</td></tr>
-            <tr><td>2010</td><td>67.8</td><td style="color: var(--danger)">-17.8%</td></tr>
-            <tr><td>2015</td><td>64.5</td><td style="color: var(--danger)">-21.8%</td></tr>
-            <tr><td>2020</td><td>60.0</td><td style="color: var(--danger)">-27.3%</td></tr>
-            <tr><td>2025</td><td>56.0</td><td style="color: var(--danger)">-32.1%</td></tr>
+            <tr><td>1850</td><td>105.62</td><td>0.0%</td></tr>
+            <tr><td>1931</td><td>99.68</td><td style="color: var(--danger)">-5.6%</td></tr>
+            <tr><td>1973</td><td>86.63</td><td style="color: var(--danger)">-18.0%</td></tr>
+            <tr><td>2010</td><td>78.36</td><td style="color: var(--danger)">-25.8%</td></tr>
+            <tr><td>2016</td><td>78.49</td><td style="color: var(--danger)">-25.7%</td></tr>
           </tbody>
         </table>
       </article>
