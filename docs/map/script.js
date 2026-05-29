@@ -823,8 +823,12 @@ async function loadVelocityCSV() {
       const altitude = parseFloat(cols[col('altitude_from')]);
       const dx = parseFloat(cols[col('d_x')]);
       const dy = parseFloat(cols[col('d_y')]);
-      const velocity = parseFloat(cols[col('velocity_xy')]);
-      if (!stake || !dateTo || isNaN(E) || isNaN(N) || isNaN(velocity) || isNaN(dx) || isNaN(dy)) return null;
+      const dt = parseFloat(cols[col('d_t')]); // measurement interval, decimal days
+      // The velocity_xy column in this GLAMOS release is unreliable (unit "m",
+      // negative values, frequently "None"). Derive the horizontal surface speed
+      // from the displacement vector instead, annualised to metres per year.
+      if (!stake || !dateTo || isNaN(E) || isNaN(N) || isNaN(dx) || isNaN(dy) || isNaN(dt) || dt <= 0) return null;
+      const velocity = Math.sqrt(dx * dx + dy * dy) / (dt / 365.25);
       const [lat, lon] = lv03ToWgs84(E, N);
       return {
         type: 'Feature',
@@ -851,15 +855,15 @@ async function loadVelocityCSV() {
 }
 
 function velColor(v) {
-  if (v < 2) return '#4fc3f7';
-  if (v < 4) return '#29b6f6';
-  if (v < 6) return '#ffd54f';
-  if (v < 8) return '#ff8f00';
+  if (v < 5) return '#4fc3f7';
+  if (v < 15) return '#29b6f6';
+  if (v < 30) return '#ffd54f';
+  if (v < 50) return '#ff8f00';
   return '#f44336';
 }
 
 function arrowSVG(angle, vel, color) {
-  const len = Math.min(8 + vel * 3.5, 36);
+  const len = Math.min(8 + vel * 0.55, 40);
   return `<svg viewBox="-20 -20 40 40" width="40" height="40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <g transform="rotate(${angle})">
       <line x1="0" y1="${len / 2}" x2="0" y2="${-len / 2}" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
