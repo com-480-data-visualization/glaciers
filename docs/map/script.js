@@ -989,15 +989,6 @@ function stopTimelinePlayback() {
   stopVelocityTimelinePlayback();
 }
 
-function centerLatestInventoryFeatureByName(name) {
-  const feature = geojsonCache[LATEST_INVENTORY_YEAR]?.features?.find(f => f.properties['glacier name'] === name);
-  if (!feature) return;
-  const layer = L.geoJSON(feature);
-  if (layer.getBounds().isValid()) {
-    map.panTo(layer.getBounds().getCenter(), { animate: true, duration: 0.8 });
-  }
-}
-
 function toggleAreaTimelinePlayback() {
   if (areaTimelineTimer) {
     stopAreaTimelinePlayback();
@@ -1025,7 +1016,6 @@ async function toggleVelocityTimelinePlayback() {
   stopAreaTimelinePlayback();
   if (!velocityVisible) velocityToggleBtn.click();
   await ensureInventoryYear(LATEST_INVENTORY_YEAR);
-  centerLatestInventoryFeatureByName('Allalingletscher');
   velocityPlayBtn.classList.add('active');
   velocityPlayBtn.textContent = 'Pause velocity';
   let index = VELOCITY_YEARS.indexOf(nearestVelocityYear(Number(velYearSlider.value)));
